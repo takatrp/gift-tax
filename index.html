@@ -3,11 +3,15 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>贈与税試算ツール（暦年課税・相続時精算課税・長期シミュレーション）</title>
+  <title>贈与税試算ツール（完全版）</title>
 
+  <!-- ファビコン設定 -->
   <link rel="icon" type="image/png" sizes="192x192" href="./favicon192192.png" />
   <link rel="apple-touch-icon" href="./favicon192192.png" />
   <meta name="theme-color" content="#578899" />
+
+  <!-- Chart.js (グラフ描画ライブラリ) -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
   <style>
     :root{
@@ -243,35 +247,43 @@
       display:inline-flex;
       align-items:center;
       gap:6px;
-      padding:8px 12px;
+      padding:10px 16px;
       border-radius:var(--radius-pill);
-      border:1px solid var(--border);
-      background:#f7fafb;
-      font-size:13px;
-      color:var(--muted);
+      border:1px solid transparent; /* 非選択時はボーダーなし */
+      background:transparent;
+      font-size:15px;
+      font-weight:700;
+      color:var(--ink); /* 非選択時は黒 */
       cursor:pointer;
       transition: all 0.2s ease;
     }
     .radio-chip:active { transform: scale(0.98); }
     .radio-chip input{display:none;}
+    
+    /* 選択時のスタイル：太文字・緑色・丸囲み風ボーダーor背景 */
     .radio-chip input:checked + span{
       color:var(--accent);
-      font-weight:600;
     }
     .radio-chip span::before{
       content:"";
       display:inline-block;
-      width:12px;
-      height:12px;
+      width:16px;
+      height:16px;
       border-radius:999px;
-      border:1px solid var(--border);
-      margin-right:4px;
+      border:2px solid #d1d5db;
+      margin-right:8px;
       background:#fff;
+      vertical-align: middle;
+      position: relative;
+      top: -1px;
     }
     .radio-chip input:checked + span::before{
       border-color:var(--accent);
-      box-shadow:0 0 0 3px rgba(87,136,153,.25);
-      background:radial-gradient(circle at center, var(--accent) 0 55%, #fff 55% 100%);
+      background:radial-gradient(circle at center, var(--accent) 0 40%, #fff 45% 100%);
+    }
+    /* 非選択時のホバー */
+    .radio-chip:hover span::before {
+      border-color: var(--accent-dark);
     }
 
     .btn-row{
@@ -458,6 +470,45 @@
       color:var(--muted);
     }
     .hidden{display:none!important;}
+
+    /* グラフコンテナ */
+    .chart-container {
+      position: relative;
+      height: 300px;
+      width: 100%;
+      margin-top: 20px;
+    }
+    @media(max-width:600px){
+      .chart-container {
+        height: 260px;
+      }
+    }
+
+    /* 詳細テーブル */
+    .detail-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+      background: #fff;
+      white-space: nowrap;
+    }
+    .detail-table th, .detail-table td {
+      border: 1px solid var(--border);
+      padding: 8px 12px;
+      text-align: right;
+    }
+    .detail-table th {
+      background: #f7fafb;
+      font-weight: 700;
+      color: var(--ink);
+      text-align: center;
+      position: sticky;
+      top: 0;
+      z-index: 1;
+    }
+    .detail-table tr:nth-child(even) {
+      background: #fcfdfd;
+    }
     
     /* チュートリアルボタン */
     .btn-tutorial{
@@ -531,6 +582,71 @@
     }
     @media(max-width:600px){
       .mk-tour-panel{left:12px;right:12px;max-width:calc(100vw - 24px);}
+    }
+
+    /* =========================================
+       印刷用スタイル (Print Styles) - 追加
+       ========================================= */
+    @media print {
+      body {
+        background: #fff;
+        color: #000;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+      .app-header,
+      .btn-tutorial,
+      .btn-row,
+      .btn-ghost,
+      .action-buttons,
+      footer.mk-mini,
+      .mk-tour-mask,
+      .mk-tour-focus,
+      .mk-tour-panel {
+        display: none !important;
+      }
+      .layout {
+        padding: 0;
+        max-width: 100%;
+      }
+      .card {
+        box-shadow: none;
+        border: 1px solid #ccc;
+        margin-bottom: 20px;
+        page-break-inside: avoid;
+      }
+      /* 詳細エリアは強制表示、スクロールなし */
+      #detailsArea {
+        display: block !important;
+        overflow: visible !important;
+      }
+      .detail-table th {
+        position: static !important; /* sticky解除 */
+      }
+      /* 入力欄の枠を薄く */
+      input, select {
+        border: none;
+        background: transparent;
+        padding: 0;
+        text-align: right;
+        width: auto;
+        display: inline-block;
+      }
+      .pill-switch {
+        border: none;
+        background: none;
+      }
+      .pill-switch input:checked + span {
+        box-shadow: none;
+        font-weight: bold;
+        border: 1px solid #000;
+      }
+      .radio-chip {
+        border: 1px solid #ccc;
+      }
+      .radio-chip input:checked + span::before {
+        background: #000;
+      }
     }
 
     /* =========================================
@@ -613,7 +729,7 @@
         <img src="./logo.jpg" alt="税理士法人松本会計事務所" class="brand-logo" />
         <div class="brand-text">
           <h1 class="brand-title">贈与税試算ツール</h1>
-          <p class="brand-subtitle">暦年課税（一般・特例）／相続時精算課税／長期シミュレーション（概算）</p>
+          <p class="brand-subtitle">暦年課税（一般・特例）／相続時精算課税／長期シミュレーション</p>
         </div>
       </a>
       <button type="button" class="btn-tutorial" id="startTour">チュートリアル</button>
@@ -622,28 +738,30 @@
 
   <main class="layout">
 
+    <!-- モードタブ切替 -->
     <section class="card">
       <div class="card-header">
         <h2 class="card-title">モード選択</h2>
       </div>
       <div class="card-body">
-        <div class="pill-switch" id="tabSwitch">
-          <label>
+        <div class="radio-row" id="tabSwitch">
+          <label class="radio-chip">
             <input type="radio" name="tabMode" value="single" checked>
             <span>単年試算（1年分の贈与税）</span>
           </label>
-          <label>
+          <label class="radio-chip">
             <input type="radio" name="tabMode" value="multi">
             <span>長期シミュレーション（暦年 vs 精算）</span>
           </label>
         </div>
-        <small>
+        <div style="margin-top:12px; font-size:13px; color:var(--muted); line-height:1.5;">
           単年試算タブでは「1人の受贈者について1年間の贈与税額」を、長期シミュレーションタブでは
           「相続財産・相続までの年数・毎年の贈与額等」を前提とした暦年課税 vs 相続時精算課税の概算比較を行います。
-        </small>
+        </div>
       </div>
     </section>
 
+    <!-- 単年試算エリア（既存ロジック） -->
     <div id="singleModeArea">
       <section class="card">
         <div class="card-header">
@@ -653,12 +771,12 @@
         <div class="card-body">
           <div class="field">
             <label>試算したい贈与税の計算方法</label>
-            <div class="pill-switch" id="modeSwitch">
-              <label>
+            <div class="radio-row" id="modeSwitch">
+              <label class="radio-chip">
                 <input type="radio" name="mode" value="annual" checked>
                 <span>暦年課税（一般・特例）</span>
               </label>
-              <label>
+              <label class="radio-chip">
                 <input type="radio" name="mode" value="seisan">
                 <span>相続時精算課税</span>
               </label>
@@ -734,6 +852,7 @@
             <div class="field">
               <label>今年 1年間の贈与額（特定贈与者 1人分）</label>
               <input type="text" inputmode="numeric" id="seisanAmount" placeholder="例）5,000,000" class="yen-input" />
+              <!-- 修正: 注意書きを強化 -->
               <small>※父・母など、精算課税を選択した「特定の贈与者1名」からの贈与額を入力してください。複数人から受けている場合は個別に計算が必要です。</small>
             </div>
             <div class="field">
@@ -784,34 +903,40 @@
       </section>
     </div>
 
+    <!-- 長期シミュレーションエリア -->
     <div id="multiModeArea" class="hidden">
       <section class="card" id="multiCommonCard">
         <div class="card-header">
           <h2 class="card-title">STEP1 長期シミュレーションの前提条件</h2>
         </div>
         <div class="card-body">
-          <div class="grid grid-2">
+          <div class="grid grid-3">
             <div class="field">
               <label>現在の相続財産総額（贈与前）</label>
               <input type="text" inputmode="numeric" id="multiEstateTotal" placeholder="例）150,000,000" class="yen-input" />
-              <small>預金・有価証券・不動産など、相続財産となる資産の概算合計額。</small>
+              <small>預金・有価証券・不動産など。</small>
             </div>
             <div class="field">
-              <label>相続までの想定年数（シミュレーション期間）</label>
+              <label>相続までの想定年数</label>
               <input type="number" id="multiYears" class="align-left" placeholder="例）15" min="1" step="1" />
-              <small>「あと○年程度で相続が発生する」と想定する年数。概算で構いません。</small>
+              <small>相続が発生するまでの期間。</small>
+            </div>
+            <div class="field">
+              <label>受贈者の人数（法定相続人）</label>
+              <input type="number" id="multiRecipients" class="align-left" placeholder="例）2" min="1" step="1" />
+              <small>贈与を受ける子・孫の人数。<strong>法定相続人数としても計算に使用します。</strong></small>
             </div>
           </div>
           <div class="grid grid-2" style="margin-top:12px;">
             <div class="field">
               <label>年間運用利回り（％）</label>
               <input type="number" id="multiReturnRate" class="align-left" placeholder="例）1.0" step="0.1" />
-              <small>相続財産全体の平均的な増減率（0％とすれば運用を考慮しません）。</small>
+              <small>相続財産全体の平均的な増減率。</small>
             </div>
             <div class="field">
-              <label>想定相続税実効税率（％）</label>
-              <input type="number" id="multiEffRate" class="align-left" placeholder="例）20" step="1" />
-              <small>厳密な相続税計算の代わりに、課税ベースに乗じる概算の税率（例：20〜30％）。</small>
+              <label>想定相続税実効税率（％）<span id="effRateAuto" style="font-size:11px; color:var(--accent); margin-left:4px; font-weight:normal;">※自動推計</span></label>
+              <input type="number" id="multiEffRate" class="align-left" placeholder="例）20" step="0.1" />
+              <small>財産額と法定相続人数(＝受贈者数)から自動推計します（手動変更可）。</small>
             </div>
           </div>
         </div>
@@ -826,16 +951,11 @@
             <div class="field">
               <label>1人あたり毎年の贈与額</label>
               <input type="text" inputmode="numeric" id="multiAnnualGiftPerPerson" placeholder="例）3,000,000" class="yen-input" />
-              <small>特例贈与財産（直系尊属→18歳以上の子・孫）を前提に、1人あたり毎年いくら贈与するかを入力します。</small>
-            </div>
-            <div class="field">
-              <label>受贈者の人数</label>
-              <input type="number" id="multiAnnualRecipients" class="align-left" placeholder="例）2" min="1" step="1" />
-              <small>同じ金額を受け取る子・孫の人数（例：子2人なら「2」）。</small>
+              <small>特例贈与財産（直系尊属→18歳以上の子・孫）を前提とします。</small>
             </div>
           </div>
           <small>
-            ※ 暦年贈与シナリオでは、毎年同額を特例贈与として贈与する前提で、贈与税は特例税率（子・孫が18歳以上）で概算します。
+            ※ STEP1で設定した人数全員に、毎年同額を贈与する前提で計算します。
           </small>
         </div>
       </section>
@@ -847,23 +967,26 @@
         <div class="card-body">
           <div class="grid grid-2">
             <div class="field">
-              <label>シミュレーション開始時にまとめて贈与する額</label>
+              <label>1人あたり一括贈与額（初年度）</label>
               <input type="text" inputmode="numeric" id="multiSeisanInitialGift" placeholder="例）25,000,000" class="yen-input" />
-              <small>相続時精算課税を選択して一括移転する額（自宅・賃貸不動産・まとまった金融資産など）。0円も可。</small>
+              <small>シミュレーション開始時に、受贈者1人あたりにまとめて贈与する額。0円も可。</small>
             </div>
             <div class="field">
-              <label>2年目以降、毎年贈与する額</label>
+              <label>1人あたり毎年贈与額（2年目以降）</label>
               <input type="text" inputmode="numeric" id="multiSeisanAnnualGift" placeholder="例）1,100,000" class="yen-input" />
-              <small>相続時精算課税の贈与者 1人から、その受贈者 1人へ毎年贈与する額。110万円以下なら申告不要・加算対象外。</small>
+              <small>精算課税を選択後、受贈者1人あたりに毎年贈与する額。</small>
             </div>
           </div>
           <div class="grid grid-2" style="margin-top:12px;">
             <div class="field">
-              <label>既に使用済みの特別控除額</label>
+              <label>既に使用済みの特別控除額（1人あたり）</label>
               <input type="text" inputmode="numeric" id="multiSeisanUsedSpecialBefore" placeholder="例）0" class="yen-input" />
-              <small>当該贈与者について、これまでに相続時精算課税で使った特別控除額（0〜25,000,000）。</small>
+              <small>これまでに相続時精算課税で使った特別控除額（0〜25,000,000）。</small>
             </div>
           </div>
+          <small style="display:block; margin-top:8px;">
+             ※ STEP1で設定した人数全員に対して、上記条件で贈与を行う前提で計算します（人数分の資産減少効果・税額が発生します）。
+          </small>
           <div class="btn-row">
             <button type="button" class="btn-calc" id="runMultiSimBtn">
               <span class="btn-calc-icon">▶</span>
@@ -880,11 +1003,12 @@
         </div>
         <div class="card-body">
           <p id="multiResultSummary" class="result-heading">前提条件と各シナリオの設定をもとに、暦年贈与シナリオと相続時精算課税シナリオの税負担・残財産を概算しています。</p>
+          
           <div class="result-grid">
             <div class="metric">
               <div class="metric-label">暦年贈与シナリオ：トータル税負担</div>
               <div class="metric-value" id="multiAnnualTotalTax">- 円</div>
-              <div class="metric-sub">贈与税＋相続税（概算）の合計</div>
+              <div class="metric-sub" id="multiAnnualTaxDetail">贈与税＋相続税額（概算）の合計</div>
             </div>
             <div class="metric">
               <div class="metric-label">暦年贈与シナリオ：相続時点の残財産</div>
@@ -894,7 +1018,7 @@
             <div class="metric">
               <div class="metric-label">相続時精算課税シナリオ：トータル税負担</div>
               <div class="metric-value" id="multiSeisanTotalTax">- 円</div>
-              <div class="metric-sub">贈与税＋相続税（相続時精算課税分控除後）の合計</div>
+              <div class="metric-sub" id="multiSeisanTaxDetail">贈与税＋相続税額（精算贈与税控除後）の合計</div>
             </div>
             <div class="metric">
               <div class="metric-label">相続時精算課税シナリオ：相続時点の残財産</div>
@@ -904,9 +1028,65 @@
             <div class="metric metric-featured">
               <div class="metric-label">税負担の差額（暦年 − 精算）</div>
               <div class="metric-value" id="multiTaxDiff">- 円</div>
+              <div id="multiTaxAdvantage" style="font-weight:900; font-size:18px; margin-top:4px; color:var(--accent);"></div>
               <div class="metric-sub" id="multiTaxDiffSub">プラスなら相続時精算課税シナリオの方が税負担が軽い結果です。</div>
             </div>
           </div>
+
+          <!-- グラフ描画エリア -->
+          <div style="display:flex; align-items:center; justify-content:space-between; margin:24px 0 12px; flex-wrap:wrap; gap:10px;">
+            <h3 style="margin:0; font-size:16px; font-weight:700; color:var(--accent-dark);">
+              シミュレーション結果の可視化
+            </h3>
+            <button type="button" class="btn-ghost" id="toggleDetailsBtn" style="font-size:12px; padding:6px 12px;">詳細データを見る</button>
+          </div>
+          
+          <div class="grid grid-2">
+            <div>
+              <div style="font-size:14px; font-weight:700; color:var(--muted); text-align:center;">① トータル税負担の内訳比較</div>
+              <div class="chart-container">
+                <canvas id="taxBreakdownChart"></canvas>
+              </div>
+              <div style="font-size:12px; color:var(--muted); margin-top:4px;">
+                相続までに支払う「贈与税」と、相続時に支払う「相続税額」の合計負担額を比較します。
+              </div>
+            </div>
+            <div>
+              <div style="font-size:14px; font-weight:700; color:var(--muted); text-align:center;">② 資産残高の推移シミュレーション</div>
+              <div class="chart-container">
+                <canvas id="assetTransitionChart"></canvas>
+              </div>
+              <div style="font-size:12px; color:var(--muted); margin-top:4px;">
+                贈与による資産の減少、運用による増加、そして相続税額支払による最終手取り額の推移を表します。
+              </div>
+            </div>
+          </div>
+
+          <!-- 詳細データテーブル（初期非表示） -->
+          <div id="detailsArea" class="hidden" style="margin-top:16px; overflow-x:auto; border-top:1px dashed var(--border); padding-top:16px;">
+            <div style="font-size:14px; font-weight:700; margin-bottom:8px; color:var(--accent-dark);">▼ 年次シミュレーション詳細</div>
+            <table class="detail-table" id="detailsTable">
+              <thead>
+                <tr>
+                  <th rowspan="2">経過年</th>
+                  <th colspan="3" style="border-bottom:1px solid #d4e1e7; background:#f0f8fa;">暦年贈与シナリオ</th>
+                  <th colspan="3" style="border-bottom:1px solid #d4e1e7; background:#fff3f3;">精算課税シナリオ</th>
+                </tr>
+                <tr>
+                  <th style="background:#f0f8fa;">贈与額(計)</th>
+                  <th style="background:#f0f8fa;">贈与税(計)</th>
+                  <th style="background:#f0f8fa;">期末資産</th>
+                  <th style="background:#fff3f3;">贈与額(計)</th>
+                  <th style="background:#fff3f3;">贈与税(計)</th>
+                  <th style="background:#fff3f3;">期末資産</th>
+                </tr>
+              </thead>
+              <tbody id="detailsTableBody">
+                <!-- JSで生成 -->
+              </tbody>
+            </table>
+          </div>
+
         </div>
       </section>
     </div>
@@ -921,7 +1101,7 @@
           <li>土地・建物、有価証券の評価、各種非課税枠（配偶者控除、住宅取得資金の非課税、教育資金一括贈与 等）、特例税率の適用判定、相続税への生前贈与加算の詳細（7年加算・経過措置・100万円控除 等）については、本ツールでは簡略化しており、別途の検討が必要です。</li>
           <li>相続時精算課税については、令和6年1月1日以後の贈与に創設された年110万円の基礎控除と、累計2,500万円の特別控除を前提としています。</li>
           <li>長期シミュレーションの暦年贈与における相続財産への加算期間は、経過措置を考慮せず一律「相続前7年間」として概算しています。</li>
-          <li>長期シミュレーションでは、相続税は「想定相続税実効税率」を用いた概算であり、実際の相続税計算結果とは異なる場合があります。</li>
+          <li>長期シミュレーションでは、贈与後の最終的な財産額（持ち戻し額を含む）に基づき、法定相続人が法定相続分通りに遺産を取得したと仮定して相続税額を計算しています。配偶者の有無や特例の適用等は考慮していないため、あくまで概算の目安としてご利用ください。</li>
         </ul>
         <div class="note-highlight">
           本ツールは税額の「概算」を把握することを目的としたものであり、申告書作成や申告是非の判断を直接行うものではありません。実務では、贈与の内容・時期・受贈者・贈与者の関係などを総合的に確認する必要があります。実際の贈与の実行・申告にあたっては、松本会計のスタッフにご相談ください。
@@ -929,6 +1109,7 @@
       </div>
     </section>
 
+    <!-- 下部アクションボタン -->
     <section class="card" id="bottomActions">
       <div class="card-body">
         <div class="action-buttons">
@@ -946,7 +1127,7 @@
     <a href="https://www.matsumoto-kaikei.or.jp/" target="_blank" rel="noopener license">税理士法人松本会計事務所</a> ｜ 
     <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank" rel="license noopener">CC BY-NC-SA 4.0</a> ｜ 
     <a href="/tool-portal/terms.html" target="_blank" rel="noopener">利用条件</a> ｜ 
-    <span id="build-rev">r4</span>（<span id="last-updated-date"></span>）
+    <span id="build-rev">v1.2 Final</span>（<span id="last-updated-date"></span>）
   </footer>
 </div>
 
@@ -954,7 +1135,7 @@
 (function(){
   'use strict';
 
-  const VERSION = 'r4';
+  const VERSION = 'v1.2 Final';
 
   // 年号 & 最終更新日を自動反映
   (function syncFooterMeta(){
@@ -997,6 +1178,18 @@
     { upTo: 30000000, rate: 0.45, deduction: 2650000 },
     { upTo: 45000000, rate: 0.50, deduction: 4150000 },
     { upTo: Infinity, rate: 0.55, deduction: 6400000 }
+  ];
+
+  // 相続税速算表（平成27年1月1日以後）
+  const INHERITANCE_TAX_BRACKETS = [
+    { upTo: 10000000, rate: 0.10, deduction: 0 },
+    { upTo: 30000000, rate: 0.15, deduction: 500000 },
+    { upTo: 50000000, rate: 0.20, deduction: 2000000 },
+    { upTo: 100000000, rate: 0.30, deduction: 7000000 },
+    { upTo: 200000000, rate: 0.40, deduction: 17000000 },
+    { upTo: 300000000, rate: 0.50, deduction: 42000000 },
+    { upTo: 600000000, rate: 0.55, deduction: 72000000 },
+    { upTo: Infinity, rate: 0.55, deduction: 72000000 } // 上限なしだが計算上必要
   ];
 
   // DOM取得（単年タブ）
@@ -1050,9 +1243,9 @@
   const multiYears = document.getElementById('multiYears');
   const multiReturnRate = document.getElementById('multiReturnRate');
   const multiEffRate = document.getElementById('multiEffRate');
+  const multiRecipients = document.getElementById('multiRecipients'); 
 
   const multiAnnualGiftPerPerson = document.getElementById('multiAnnualGiftPerPerson');
-  const multiAnnualRecipients = document.getElementById('multiAnnualRecipients');
 
   const multiSeisanInitialGift = document.getElementById('multiSeisanInitialGift');
   const multiSeisanAnnualGift = document.getElementById('multiSeisanAnnualGift');
@@ -1069,6 +1262,17 @@
   const multiSeisanFinalEstate = document.getElementById('multiSeisanFinalEstate');
   const multiTaxDiff = document.getElementById('multiTaxDiff');
   const multiTaxDiffSub = document.getElementById('multiTaxDiffSub');
+  const multiTaxAdvantage = document.getElementById('multiTaxAdvantage');
+  const multiAnnualTaxDetail = document.getElementById('multiAnnualTaxDetail');
+  const multiSeisanTaxDetail = document.getElementById('multiSeisanTaxDetail');
+
+  const toggleDetailsBtn = document.getElementById('toggleDetailsBtn');
+  const detailsArea = document.getElementById('detailsArea');
+  const detailsTableBody = document.getElementById('detailsTableBody');
+
+  // グラフ用変数
+  let taxBreakdownChart = null;
+  let assetTransitionChart = null;
 
   // 全ての金額入力欄（カンマ整形）
   const yenInputs = document.querySelectorAll('.yen-input');
@@ -1110,6 +1314,43 @@
     });
   });
 
+  // 自動計算：相続税実効税率
+  function updateEffectiveRate(){
+    const estateStr = multiEstateTotal.value.replace(/[^0-9]/g,'');
+    const heirsStr = multiRecipients.value;
+    if(!estateStr || !heirsStr) return;
+
+    const estate = Number(estateStr);
+    const heirs = Math.floor(Number(heirsStr));
+    if(estate <= 0 || heirs <= 0) return;
+
+    // 基礎控除額
+    const deduction = 30000000 + 6000000 * heirs;
+    const taxableEstate = Math.max(0, estate - deduction);
+
+    if(taxableEstate <= 0){
+      multiEffRate.value = "0.0";
+      return;
+    }
+
+    // 法定相続分に応じた取得金額（法定相続人は全員子と仮定して均等割）
+    const share = Math.floor(taxableEstate / heirs);
+    
+    // 1人あたりの税額計算
+    const bracket = INHERITANCE_TAX_BRACKETS.find(b => share <= b.upTo) || INHERITANCE_TAX_BRACKETS[INHERITANCE_TAX_BRACKETS.length-1];
+    const taxPerHeir = share * bracket.rate - bracket.deduction;
+    const totalTax = taxPerHeir * heirs;
+
+    // 実効税率（％）
+    const effRate = (totalTax / estate) * 100;
+    multiEffRate.value = effRate.toFixed(1);
+  }
+
+  // イベントリスナー：実効税率自動計算
+  if(multiEstateTotal) multiEstateTotal.addEventListener('blur', updateEffectiveRate);
+  if(multiRecipients) multiRecipients.addEventListener('blur', updateEffectiveRate);
+
+
   // ユーティリティ
   function parseYenInput(el){
     if(!el) return 0;
@@ -1150,7 +1391,24 @@
     return Number.isFinite(n) ? n : defaultValue;
   }
 
-  // ===== チュートリアル（既存） =====
+  // 新しい相続税計算関数
+  function calcInheritanceTaxAmount(estateTotal, heirsCount) {
+    if (estateTotal <= 0 || heirsCount <= 0) return 0;
+    const deduction = 30000000 + 6000000 * heirsCount;
+    const taxable = Math.max(0, estateTotal - deduction);
+    if (taxable <= 0) return 0;
+    
+    // 法定相続分で按分（全員均等と仮定）
+    const share = Math.floor(taxable / heirsCount);
+    
+    // 速算表から計算
+    const bracket = INHERITANCE_TAX_BRACKETS.find(b => share <= b.upTo) || INHERITANCE_TAX_BRACKETS[INHERITANCE_TAX_BRACKETS.length-1];
+    const taxPerHeir = share * bracket.rate - bracket.deduction;
+    
+    return Math.floor(taxPerHeir * heirsCount);
+  }
+
+  // ===== チュートリアル =====
   const TOUR_KEY = 'gift_tax_tour_dismissed_v1';
   const steps = [
     {
@@ -1171,7 +1429,7 @@
     {
       sel: '#multiCommonCard',
       title: '長期シミュレーション：前提条件',
-      body: '長期シミュレーションタブでは、相続財産総額や相続までの年数、運用利回り、想定相続税実効税率などを入力してシミュレーションを行います。'
+      body: '長期シミュレーションタブでは、相続財産総額や相続までの年数、受贈者の人数などを入力してシミュレーションを行います。財産額と人数を入力すると、相続税の実効税率目安が自動計算されます。'
     },
     {
       sel: '#resultCard',
@@ -1181,7 +1439,7 @@
     {
       sel: '#multiResultCard',
       title: '長期シミュレーション：結果表示',
-      body: '長期シミュレーション結果では、暦年贈与シナリオと相続時精算課税シナリオの税負担・残財産・税負担の差額を確認できます。'
+      body: '長期シミュレーション結果では、税負担・残財産・有利判定に加え、毎年の資産推移や詳細データを確認できます。'
     }
   ];
 
@@ -1613,7 +1871,15 @@
     multiSeisanFinalEstate.textContent = '- 円';
     multiTaxDiff.textContent = '- 円';
     multiTaxDiffSub.textContent = 'プラスなら相続時精算課税シナリオの方が税負担が軽い結果です。';
+    multiTaxAdvantage.textContent = '';
+    multiAnnualTaxDetail.textContent = '贈与税＋相続税額（概算）の合計';
+    multiSeisanTaxDetail.textContent = '贈与税＋相続税額（精算贈与税控除後）の合計';
     multiResultCard.classList.add('hidden');
+    detailsArea.classList.add('hidden');
+    detailsTableBody.innerHTML = '';
+
+    if(taxBreakdownChart) { taxBreakdownChart.destroy(); taxBreakdownChart = null; }
+    if(assetTransitionChart) { assetTransitionChart.destroy(); assetTransitionChart = null; }
   }
 
   function clearMultiInputs(){
@@ -1622,7 +1888,7 @@
     if(multiReturnRate) multiReturnRate.value = '';
     if(multiEffRate) multiEffRate.value = '';
     if(multiAnnualGiftPerPerson) multiAnnualGiftPerPerson.value = '';
-    if(multiAnnualRecipients) multiAnnualRecipients.value = '';
+    if(multiRecipients) multiRecipients.value = ''; 
     if(multiSeisanInitialGift) multiSeisanInitialGift.value = '';
     if(multiSeisanAnnualGift) multiSeisanAnnualGift.value = '';
     if(multiSeisanUsedSpecialBefore) multiSeisanUsedSpecialBefore.value = '';
@@ -1646,14 +1912,12 @@
 
     let r = parseNumber(multiReturnRate, 0) / 100;
     if(!Number.isFinite(r) || r < -1) r = 0;
-    let effRate = parseNumber(multiEffRate, 0) / 100;
-    if(!Number.isFinite(effRate) || effRate < 0) effRate = 0;
-    if(effRate > 1) effRate = 1;
 
     const giftPerPersonA = parseYenInput(multiAnnualGiftPerPerson);
-    let recipientsA = parseNumber(multiAnnualRecipients, 0);
-    recipientsA = Math.floor(recipientsA);
-    if(recipientsA < 0) recipientsA = 0;
+    
+    let recipients = parseNumber(multiRecipients, 0);
+    recipients = Math.floor(recipients);
+    if(recipients < 0) recipients = 0;
 
     const initialGiftB = parseYenInput(multiSeisanInitialGift);
     const annualGiftB = parseYenInput(multiSeisanAnnualGift);
@@ -1661,37 +1925,49 @@
     if(usedSpecialBeforeB < 0) usedSpecialBeforeB = 0;
     if(usedSpecialBeforeB > SEISAN_SPECIAL_LIMIT) usedSpecialBeforeB = SEISAN_SPECIAL_LIMIT;
 
-    // ---- 暦年贈与シナリオ ----
+    // グラフ用データ配列
+    const chartLabels = [];
+    const dataAssetA = [estate0]; // 暦年: 資産推移
+    const dataAssetB = [estate0]; // 精算: 資産推移
+
+    for(let i=0; i<=years; i++){
+      chartLabels.push(''+i+'年後');
+    }
+
+    // ---- 暦年贈与シナリオ (A) ----
     let estateA = estate0;
     let totalGiftTaxA = 0;
     let addbackListA = [];
+    const annualHistoryA = []; // { giftTotal, taxYear, estateEnd }
 
     for(let t=1; t<=years; t++){
-      const plannedGiftTotal = giftPerPersonA * recipientsA;
+      const plannedGiftTotal = giftPerPersonA * recipients;
       let giftTotal = plannedGiftTotal;
       if(estateA <= 0 || plannedGiftTotal <= 0){
         giftTotal = 0;
       }else if(plannedGiftTotal > estateA){
-        giftTotal = estateA; // 残高を超える場合は残高まで
+        giftTotal = estateA; 
       }
 
-      if(giftTotal > 0 && recipientsA > 0){
-        const perGift = giftTotal / recipientsA;
+      let taxYear = 0;
+      if(giftTotal > 0 && recipients > 0){
+        const perGift = giftTotal / recipients;
         const basePer = Math.max(0, perGift - BASE_DEDUCTION);
         const taxBasePer = truncateToThousand(basePer);
-        const taxInfoPer = calcTaxFromTable(taxBasePer, SPECIAL_BRACKETS); // 特例贈与前提
+        const taxInfoPer = calcTaxFromTable(taxBasePer, SPECIAL_BRACKETS); 
         const taxPer = roundTax100(taxInfoPer.tax);
-        const taxYear = taxPer * recipientsA;
+        taxYear = taxPer * recipients;
         totalGiftTaxA += taxYear;
       }
 
-      // 【修正】暦年贈与の生前贈与加算は、基礎控除（110万）控除「前」の金額を加算する
-      // （※経過措置の100万円控除等は考慮せず安全側に倒して全額加算）
       const addbackYear = giftTotal; 
       addbackListA.push(addbackYear);
 
       estateA = Math.max(0, estateA - giftTotal);
       estateA = estateA * (1 + r);
+      dataAssetA.push(estateA);
+      
+      annualHistoryA.push({ giftTotal, taxYear, estateEnd: estateA });
     }
 
     let addbackA = 0;
@@ -1702,77 +1978,157 @@
     }
 
     const estateBaseA = estateA + addbackA;
-    const estateTaxA = Math.max(0, estateBaseA * effRate);
+    const estateTaxA = calcInheritanceTaxAmount(estateBaseA, recipients);
     const totalTaxA = totalGiftTaxA + estateTaxA;
+    const finalNetA = Math.max(0, estateA - estateTaxA);
 
-    // ---- 相続時精算課税シナリオ ----
+    // 実効税率(A)参考
+    const effectiveRateA = (estateTaxA / estateBaseA) * 100;
+
+    // ---- 相続時精算課税シナリオ (B) ----
     let estateB = estate0;
     let totalGiftTaxB = 0;
     let addbackB = 0;
-    let remainingSpecialB = Math.max(0, SEISAN_SPECIAL_LIMIT - usedSpecialBeforeB);
+    let remainingSpecialPerPerson = Math.max(0, SEISAN_SPECIAL_LIMIT - usedSpecialBeforeB);
+    const annualHistoryB = [];
 
     // 年1：一括贈与
     if(initialGiftB > 0 && estateB > 0){
-      let gift1 = initialGiftB;
-      if(gift1 > estateB) gift1 = estateB;
+      let plannedTotal = initialGiftB * recipients;
+      let actualTotal = plannedTotal;
+      if(actualTotal > estateB) actualTotal = estateB;
+      
+      let perGift = (recipients > 0) ? actualTotal / recipients : 0;
+      let taxYear = 0;
 
-      const baseAfterKiso1 = Math.max(0, gift1 - BASE_DEDUCTION);
-      const specialUse1 = Math.min(baseAfterKiso1, remainingSpecialB);
-      remainingSpecialB -= specialUse1;
-      const taxable1 = Math.max(0, baseAfterKiso1 - specialUse1);
-      const taxBase1 = truncateToThousand(taxable1);
-      const rawTax1 = taxBase1 * 0.20;
-      const tax1 = roundTax100(rawTax1);
-      totalGiftTaxB += tax1;
+      if(perGift > 0){
+        const baseAfterKiso = Math.max(0, perGift - BASE_DEDUCTION);
+        const specialUse = Math.min(baseAfterKiso, remainingSpecialPerPerson);
+        remainingSpecialPerPerson -= specialUse;
+        
+        const taxable = Math.max(0, baseAfterKiso - specialUse);
+        const taxBase = truncateToThousand(taxable);
+        const rawTax = taxBase * 0.20;
+        const taxPerPerson = roundTax100(rawTax);
+        
+        taxYear = taxPerPerson * recipients;
+        totalGiftTaxB += taxYear;
+        
+        const addbackPer = Math.max(0, perGift - BASE_DEDUCTION);
+        addbackB += addbackPer * recipients;
+      }
 
-      const addback1 = Math.max(0, gift1 - BASE_DEDUCTION); // 基礎控除超部分が相続時に加算される前提
-      addbackB += addback1;
-
-      estateB = Math.max(0, estateB - gift1);
+      estateB = Math.max(0, estateB - actualTotal);
       estateB = estateB * (1 + r);
+      dataAssetB.push(estateB);
+      annualHistoryB.push({ giftTotal: actualTotal, taxYear, estateEnd: estateB });
     }else{
       estateB = estateB * (1 + r);
+      dataAssetB.push(estateB);
+      annualHistoryB.push({ giftTotal: 0, taxYear: 0, estateEnd: estateB });
     }
 
     // 年2〜N：毎年贈与
     for(let t=2; t<=years; t++){
-      let giftYear = annualGiftB;
-      if(estateB <= 0 || giftYear <= 0){
-        giftYear = 0;
-      }else if(giftYear > estateB){
-        giftYear = estateB;
+      let plannedTotal = annualGiftB * recipients;
+      let actualTotal = plannedTotal;
+
+      if(estateB <= 0 || plannedTotal <= 0){
+        actualTotal = 0;
+      }else if(plannedTotal > estateB){
+        actualTotal = estateB;
       }
 
-      if(giftYear > 0){
-        const baseAfterKiso = Math.max(0, giftYear - BASE_DEDUCTION);
-        const specialUse = Math.min(baseAfterKiso, remainingSpecialB);
-        remainingSpecialB -= specialUse;
+      let perGift = (recipients > 0) ? actualTotal / recipients : 0;
+      let taxYear = 0;
+
+      if(perGift > 0){
+        const baseAfterKiso = Math.max(0, perGift - BASE_DEDUCTION);
+        const specialUse = Math.min(baseAfterKiso, remainingSpecialPerPerson);
+        remainingSpecialPerPerson -= specialUse;
+        
         const taxable = Math.max(0, baseAfterKiso - specialUse);
         const taxBase = truncateToThousand(taxable);
         const rawTax = taxBase * 0.20;
-        const tax = roundTax100(rawTax);
-        totalGiftTaxB += tax;
+        const taxPerPerson = roundTax100(rawTax);
+        
+        taxYear = taxPerPerson * recipients;
+        totalGiftTaxB += taxYear;
 
-        const addbackYearB = Math.max(0, giftYear - BASE_DEDUCTION);
-        addbackB += addbackYearB;
-
-        estateB = Math.max(0, estateB - giftYear);
+        const addbackPer = Math.max(0, perGift - BASE_DEDUCTION);
+        addbackB += addbackPer * recipients;
+        
+        estateB = Math.max(0, estateB - actualTotal);
       }
       estateB = estateB * (1 + r);
+      dataAssetB.push(estateB);
+      annualHistoryB.push({ giftTotal: actualTotal, taxYear, estateEnd: estateB });
     }
 
     const estateBaseB = estateB + addbackB;
-    const estateTaxB = Math.max(0, estateBaseB * effRate);
+    const estateTaxB_Total = calcInheritanceTaxAmount(estateBaseB, recipients);
 
-    let totalTaxB;
+    // 精算課税分の贈与税控除
     let netEstateTaxB;
-    if(estateTaxB >= totalGiftTaxB){
-      netEstateTaxB = estateTaxB - totalGiftTaxB;
-      totalTaxB = estateTaxB; // 贈与税は全額相続税から控除可能な範囲内
+    let totalTaxB;
+    if(estateTaxB_Total >= totalGiftTaxB){
+      netEstateTaxB = estateTaxB_Total - totalGiftTaxB;
+      totalTaxB = estateTaxB_Total; 
     }else{
-      netEstateTaxB = 0;
-      totalTaxB = totalGiftTaxB; // 贈与税の方が大きい場合
+      // 贈与税の方が多い場合（還付される）
+      netEstateTaxB = estateTaxB_Total - totalGiftTaxB; // マイナスになる
+      totalTaxB = estateTaxB_Total;
     }
+
+    const finalNetB = Math.max(0, estateB - netEstateTaxB);
+    
+    // 実効税率(B)参考
+    const effectiveRateB = (estateTaxB_Total / estateBaseB) * 100;
+
+    // 詳細テーブル構築
+    let rowsHtml = '';
+    for(let i=0; i<years; i++){
+      const a = annualHistoryA[i];
+      const b = annualHistoryB[i];
+      rowsHtml += `
+        <tr>
+          <td style="text-align:center; background:#fafafa;">${i+1}年目</td>
+          <td>${formatYen(Math.round(a.giftTotal))}</td>
+          <td>${formatYen(Math.round(a.taxYear))}</td>
+          <td>${formatYen(Math.round(a.estateEnd))}</td>
+          <td>${formatYen(Math.round(b.giftTotal))}</td>
+          <td>${formatYen(Math.round(b.taxYear))}</td>
+          <td>${formatYen(Math.round(b.estateEnd))}</td>
+        </tr>
+      `;
+    }
+    
+    // 最終結果行（相続発生後）
+    rowsHtml += `
+      <tr style="font-weight:bold; border-top:2px solid var(--border);">
+        <td style="text-align:center; background:#fafafa; vertical-align:top; padding-top:12px;">相続発生時</td>
+        <td colspan="3" style="background:#f0f8fa; text-align:right; line-height:1.8; padding:10px;">
+          <div style="color:var(--muted); font-size:12px;">残財産: ${formatYen(Math.round(estateA))}</div>
+          <div style="color:#b42318; font-size:12px;">+ 持戻し(${yearsForAddback}年分): ${formatYen(Math.round(addbackA))}</div>
+          <div style="border-bottom:1px solid #ccc; margin:2px 0;"></div>
+          <div style="font-weight:700;">= 課税価格: ${formatYen(Math.round(estateBaseA))}</div>
+          <div style="margin-top:6px; color:var(--ink);">相続税額: ${formatYen(Math.round(estateTaxA))}</div>
+          <div style="font-size:11px; color:var(--muted);">（実効税率: ${effectiveRateA.toFixed(1)}%）</div>
+          <div style="color:var(--accent); font-weight:900; font-size:14px; margin-top:4px;">最終手取: ${formatYen(Math.round(finalNetA))}</div>
+        </td>
+        <td colspan="3" style="background:#fff3f3; text-align:right; line-height:1.8; padding:10px;">
+          <div style="color:var(--muted); font-size:12px;">残財産: ${formatYen(Math.round(estateB))}</div>
+          <div style="color:#b42318; font-size:12px;">+ 持戻し(精算): ${formatYen(Math.round(addbackB))}</div>
+          <div style="border-bottom:1px solid #ccc; margin:2px 0;"></div>
+          <div style="font-weight:700;">= 課税価格: ${formatYen(Math.round(estateBaseB))}</div>
+          <div style="margin-top:6px; color:var(--ink);">相続税額: ${formatYen(Math.round(netEstateTaxB))}</div>
+          <div style="font-size:11px; color:var(--muted);">（実効税率: ${effectiveRateB.toFixed(1)}%）</div>
+          <div style="color:var(--accent); font-weight:900; font-size:14px; margin-top:4px;">最終手取: ${formatYen(Math.round(finalNetB))}</div>
+        </td>
+      </tr>
+    `;
+    detailsTableBody.innerHTML = rowsHtml;
+
 
     // 結果表示
     multiAnnualTotalTax.textContent = formatYen(Math.round(totalTaxA)) + ' 円';
@@ -1780,18 +2136,160 @@
     multiSeisanTotalTax.textContent = formatYen(Math.round(totalTaxB)) + ' 円';
     multiSeisanFinalEstate.textContent = formatYen(Math.round(estateB)) + ' 円';
 
+    // 補足説明の更新
+    multiAnnualTaxDetail.textContent = `贈与税＋相続税額（相続前${yearsForAddback}年間の贈与額 ${formatYen(Math.round(addbackA))}円 を加算して計算）`;
+    multiSeisanTaxDetail.textContent = `贈与税＋相続税額（精算課税適用財産 ${formatYen(Math.round(addbackB))}円 を加算して計算）`;
+
     const diff = totalTaxA - totalTaxB;
     multiTaxDiff.textContent = formatYen(Math.round(diff)) + ' 円';
+    
     if(diff > 0){
       multiTaxDiffSub.textContent = 'プラス（暦年 ＞ 精算）となっているため、この前提では相続時精算課税シナリオの方が税負担が軽い結果です。';
+      multiTaxAdvantage.textContent = '相続時精算課税 有利';
+      multiTaxAdvantage.style.color = 'var(--danger)'; 
     }else if(diff < 0){
       multiTaxDiffSub.textContent = 'マイナス（暦年 ＜ 精算）となっているため、この前提では暦年贈与シナリオの方が税負担が軽い結果です。';
+      multiTaxAdvantage.textContent = '暦年贈与 有利';
+      multiTaxAdvantage.style.color = 'var(--accent)';
     }else{
       multiTaxDiffSub.textContent = '両シナリオの概算税負担は同程度となっています。その他の事情（将来の値上がり・ライフプラン等）も踏まえて検討が必要です。';
+      multiTaxAdvantage.textContent = '差なし';
+      multiTaxAdvantage.style.color = 'var(--muted)';
     }
 
     multiResultSummary.textContent = '入力いただいた前提条件のもとで、暦年贈与シナリオと相続時精算課税シナリオの税負担と相続時点の残財産を概算比較した結果です。';
     multiResultCard.classList.remove('hidden');
+
+    // ===== グラフ描画 =====
+    // 1. 税負担内訳（積上げ棒グラフ）
+    if(taxBreakdownChart){ taxBreakdownChart.destroy(); }
+    const ctx1 = document.getElementById('taxBreakdownChart').getContext('2d');
+    taxBreakdownChart = new Chart(ctx1, {
+      type: 'bar',
+      data: {
+        labels: ['暦年贈与シナリオ', '相続時精算課税シナリオ'],
+        datasets: [
+          {
+            label: '贈与税総額',
+            data: [Math.round(totalGiftTaxA), Math.round(totalGiftTaxB)],
+            backgroundColor: 'rgba(255, 99, 132, 0.6)',
+            borderColor: 'rgba(255, 99, 132, 1)',
+            borderWidth: 1
+          },
+          {
+            label: '相続税額',
+            data: [Math.round(estateTaxA), Math.round(netEstateTaxB)],
+            backgroundColor: 'rgba(54, 162, 235, 0.6)',
+            borderColor: 'rgba(54, 162, 235, 1)',
+            borderWidth: 1
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+          x: { stacked: true },
+          y: { 
+            stacked: true,
+            ticks: {
+              callback: function(value) { return (value/10000) + '万円'; }
+            }
+          }
+        },
+        plugins: {
+          tooltip: {
+            callbacks: {
+              label: function(context) {
+                let label = context.dataset.label || '';
+                if (label) { label += ': '; }
+                if (context.parsed.y !== null) {
+                  label += context.parsed.y.toLocaleString() + '円';
+                }
+                return label;
+              }
+            }
+          }
+        }
+      }
+    });
+
+    // 2. 資産推移（折れ線グラフ + 最終手取り棒）
+    const labels2 = [...chartLabels, '相続税納税後'];
+    const dataA2 = [...dataAssetA, finalNetA];
+    const dataB2 = [...dataAssetB, finalNetB];
+
+    if(assetTransitionChart){ assetTransitionChart.destroy(); }
+    const ctx2 = document.getElementById('assetTransitionChart').getContext('2d');
+    assetTransitionChart = new Chart(ctx2, {
+      type: 'line',
+      data: {
+        labels: labels2,
+        datasets: [
+          {
+            label: '暦年贈与：資産残高',
+            data: dataA2,
+            borderColor: 'rgba(75, 192, 192, 1)',
+            backgroundColor: 'rgba(75, 192, 192, 0.2)',
+            tension: 0.1,
+            borderWidth: 2,
+            pointRadius: 3
+          },
+          {
+            label: '精算課税：資産残高',
+            data: dataB2,
+            borderColor: 'rgba(153, 102, 255, 1)',
+            backgroundColor: 'rgba(153, 102, 255, 0.2)',
+            tension: 0.1,
+            borderWidth: 2,
+            pointRadius: 3
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        interaction: {
+          mode: 'index',
+          intersect: false,
+        },
+        scales: {
+          y: {
+            beginAtZero: true,
+            ticks: {
+              callback: function(value) { return (value/10000) + '万円'; }
+            }
+          }
+        },
+        plugins: {
+          tooltip: {
+            callbacks: {
+              label: function(context) {
+                let label = context.dataset.label || '';
+                if (label) { label += ': '; }
+                if (context.parsed.y !== null) {
+                  label += Math.round(context.parsed.y).toLocaleString() + '円';
+                }
+                return label;
+              }
+            }
+          }
+        }
+      }
+    });
+  }
+
+  // 詳細エリアの開閉
+  if(toggleDetailsBtn && detailsArea){
+    toggleDetailsBtn.addEventListener('click', function(){
+      if(detailsArea.classList.contains('hidden')){
+        detailsArea.classList.remove('hidden');
+        toggleDetailsBtn.textContent = '詳細データを閉じる';
+      }else{
+        detailsArea.classList.add('hidden');
+        toggleDetailsBtn.textContent = '詳細データを見る';
+      }
+    });
   }
 
   // 結果コピー
