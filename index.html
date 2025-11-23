@@ -1,0 +1,1499 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>贈与税試算ツール（暦年課税・相続時精算課税）</title>
+
+  <!-- ファビコン設定 -->
+  <link rel="icon" type="image/png" sizes="192x192" href="./favicon192192.png" />
+  <link rel="apple-touch-icon" href="./favicon192192.png" />
+  <meta name="theme-color" content="#578899" />
+
+  <style>
+    :root{
+      --bg:#f4f9fb;
+      --card:#ffffff;
+      --ink:#1e2a2d;
+      --muted:#5a6a6d;
+      --accent:#578899;
+      --accent-dark:#476a7c;
+      --accent-soft:rgba(87,136,153,.08);
+      --border:#d4e1e7;
+      --danger:#b42318;
+      --shadow:0 18px 40px rgba(20,50,70,.12);
+      --radius-lg:18px;
+      --radius-pill:999px;
+      
+      /* ボタン用カラー定義 */
+      --btn-soft-bg: #f0f8fa;
+      --btn-soft-border: #dbe9ee;
+      --btn-soft-text: #4a7d8f;
+      --btn-outline-border: #4a7d8f;
+    }
+    *{box-sizing:border-box;}
+    html,body{height:100%;}
+    body{
+      margin:0;
+      font-family:-apple-system,BlinkMacSystemFont,"Hiragino Kaku Gothic ProN","Yu Gothic","Noto Sans JP",Segoe UI,Roboto,Arial,sans-serif;
+      background:var(--bg);
+      color:var(--ink);
+      -webkit-text-size-adjust: 100%; /* モバイルでの文字サイズ自動調整を防止 */
+    }
+    .app{
+      min-height:100vh;
+      display:flex;
+      flex-direction:column;
+    }
+    .app-header{
+      background:var(--bg);
+      padding:12px 16px 8px;
+      border-bottom:1px solid #d4e1e7;
+      position: sticky; /* ヘッダーを固定してアクセスしやすく */
+      top: 0;
+      z-index: 100;
+      backdrop-filter: blur(8px);
+      background: rgba(244, 249, 251, 0.95);
+    }
+    .header-bar{
+      max-width:1080px;
+      margin:0 auto;
+      display:flex;
+      align-items:center;
+      gap:10px;
+      justify-content: space-between; /* ロゴとボタンを離す */
+    }
+    .brand{
+      display:inline-flex;
+      align-items:center;
+      gap:10px;
+      text-decoration:none;
+      color:var(--ink);
+      flex:1 1 auto;
+      min-width: 0; /* Flexboxでのはみ出し防止 */
+    }
+    .brand-logo{
+      height:40px;
+      width:auto;
+      display:block;
+      border-radius:12px;
+      object-fit:contain;
+      background:transparent;
+      padding:0;
+      flex-shrink: 0;
+    }
+    .brand-text{
+      display:flex;
+      flex-direction:column;
+      gap:2px;
+      min-width: 0; /* 文字の省略用 */
+    }
+    .brand-title{
+      font-size:18px;
+      margin:0;
+      font-weight:700;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .brand-subtitle{
+      margin:0;
+      font-size:11px;
+      color:var(--muted);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .layout{
+      width:100%;
+      max-width:1080px;
+      margin:0 auto;
+      padding:16px;
+      flex:1 0 auto;
+    }
+    .card{
+      background:var(--card);
+      border-radius:var(--radius-lg);
+      box-shadow:var(--shadow);
+      padding:18px 18px 20px;
+      margin-bottom:16px;
+      border:1px solid rgba(255,255,255,.8);
+    }
+    .card-header{
+      display:flex;
+      justify-content:space-between;
+      align-items:flex-start;
+      gap:8px;
+      margin-bottom:10px;
+      flex-wrap: wrap; /* タイトルが長い場合に折り返し */
+    }
+    .card-title{
+      margin:0;
+      font-size:15px;
+      font-weight:700;
+      display:flex;
+      align-items:center;
+      gap:8px;
+    }
+    .badge{
+      display:inline-flex;
+      align-items:center;
+      padding:2px 8px;
+      border-radius:var(--radius-pill);
+      border:1px solid rgba(255,255,255,.8);
+      font-size:10px;
+      background:rgba(0,0,0,.2);
+      white-space: nowrap;
+    }
+    .pill-switch{
+      display:inline-flex;
+      padding:2px;
+      border-radius:var(--radius-pill);
+      background:#edf3f6;
+      border:1px solid #d3e1ea;
+      gap:2px;
+    }
+    .pill-switch label{
+      position:relative;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      padding:5px 10px;
+      border-radius:var(--radius-pill);
+      font-size:12px;
+      cursor:pointer;
+      white-space:nowrap;
+      color:var(--muted);
+      transition:background .18s ease,color .18s ease;
+    }
+    .pill-switch input{display:none;}
+    .pill-switch input:checked + span{
+      background:#fff;
+      color:var(--accent);
+      box-shadow:0 0 0 1px rgba(87,136,153,.4);
+    }
+    .pill-switch span{
+      border-radius:var(--radius-pill);
+      padding:5px 10px;
+    }
+    .card-body{
+      font-size:13px;
+      color:var(--muted);
+    }
+    .grid{
+      display:grid;
+      gap:10px 16px;
+    }
+    @media(min-width:800px){
+      .grid-2{
+        grid-template-columns:repeat(2,minmax(0,1fr));
+      }
+    }
+    .field{
+      display:flex;
+      flex-direction:column;
+      gap:4px;
+    }
+    .field label{
+      font-size:12px;
+      font-weight:600;
+      color:var(--ink);
+    }
+    .field small{
+      font-size:11px;
+      color:var(--muted);
+      line-height: 1.4;
+    }
+    /* input[type="text"] に変更してカンマ入力をサポート */
+    input[type="number"],
+    input[type="text"],
+    select{
+      border-radius:10px;
+      border:1px solid var(--border);
+      padding:10px; /* タップしやすいように少し広げる */
+      font-size:16px; /* iOSでズームしないサイズ */
+      font-family:inherit;
+      outline:none;
+      width:100%;
+      background:#f9fcff;
+      transition:border-color .16s ease,box-shadow .16s ease,background .16s ease;
+      text-align: right;
+    }
+    input[type="number"]:focus,
+    input[type="text"]:focus,
+    select:focus{
+      border-color:var(--accent);
+      box-shadow:0 0 0 1px rgba(87,136,153,.3);
+      background:#fff;
+    }
+    .radio-row{
+      display:flex;
+      flex-wrap:wrap;
+      gap:8px;
+      margin-top:4px;
+    }
+    .radio-chip{
+      display:inline-flex;
+      align-items:center;
+      gap:4px;
+      padding:6px 10px; /* 少し大きめに */
+      border-radius:var(--radius-pill);
+      border:1px solid var(--border);
+      background:#f7fafb;
+      font-size:13px; /* 少し大きく */
+      color:var(--muted);
+      cursor:pointer;
+      transition: all 0.2s ease;
+    }
+    .radio-chip:active {
+      transform: scale(0.98);
+    }
+    .radio-chip input{display:none;}
+    .radio-chip input:checked + span{
+      color:var(--accent);
+      font-weight:600;
+    }
+    .radio-chip span::before{
+      content:"";
+      display:inline-block;
+      width:10px;
+      height:10px;
+      border-radius:999px;
+      border:1px solid var(--border);
+      margin-right:4px;
+      background:#fff;
+    }
+    .radio-chip input:checked + span::before{
+      border-color:var(--accent);
+      box-shadow:0 0 0 3px rgba(87,136,153,.25);
+      background:radial-gradient(circle at center, var(--accent) 0 55%, #fff 55% 100%);
+    }
+
+    .btn-row{
+      display:flex;
+      flex-wrap:wrap;
+      gap:10px;
+      margin-top:16px;
+      align-items:center;
+    }
+    /* 計算ボタン用 */
+    .btn-calc{
+      border:none;
+      border-radius:var(--radius-pill);
+      padding:10px 24px; /* タップ領域拡大 */
+      font-size:14px;
+      font-weight:600;
+      background:var(--accent);
+      color:#fff;
+      cursor:pointer;
+      display:inline-flex;
+      align-items:center;
+      justify-content: center;
+      gap:6px;
+      box-shadow:0 10px 24px rgba(87,136,153,.45);
+      transition:transform .1s ease,box-shadow .1s ease,background .1s ease;
+    }
+    .btn-calc:hover{
+      background:#4d7a8e;
+      transform:translateY(-1px);
+      box-shadow:0 12px 28px rgba(87,136,153,.55);
+    }
+    .btn-calc:active{
+      transform:translateY(1px);
+    }
+    .btn-calc-icon{
+      font-size:14px;
+    }
+    /* 入力クリアボタン用 */
+    .btn-ghost{
+      border-radius:var(--radius-pill);
+      padding:8px 16px;
+      border:1px dashed var(--border);
+      background:transparent;
+      font-size:13px;
+      color:var(--muted);
+      cursor:pointer;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    /* ========== 新しい下部ボタンデザイン ========== */
+    .action-buttons {
+      display: flex;
+      gap: 12px;
+      justify-content: flex-start;
+      flex-wrap: wrap;
+      width: 100%;
+    }
+    /* コピー・リセットボタン */
+    .btn-soft {
+      flex: 1;
+      min-width: 100px;
+      border: 1px solid var(--btn-soft-border);
+      background: var(--btn-soft-bg);
+      color: var(--btn-soft-text);
+      border-radius: 8px;
+      padding: 14px 12px; /* 高さを確保 */
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .btn-soft:hover {
+      background: #e2f1f5;
+      transform: translateY(-1px);
+    }
+    .btn-soft:active {
+      transform: scale(0.98);
+    }
+    /* 印刷ボタン */
+    .btn-outline {
+      flex: 1;
+      min-width: 140px;
+      border: 2px solid var(--btn-outline-border);
+      background: #fff;
+      color: var(--btn-outline-border);
+      border-radius: 8px;
+      padding: 13px 12px; 
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .btn-outline:hover {
+      background: #f0fcfd;
+      transform: translateY(-1px);
+    }
+    .btn-outline:active {
+      transform: scale(0.98);
+    }
+
+    .result-card{
+      border-left:4px solid var(--accent);
+    }
+    .result-grid{
+      display:grid;
+      gap:8px 16px;
+    }
+    @media(min-width:800px){
+      .result-grid{
+        grid-template-columns:repeat(2,minmax(0,1fr));
+      }
+    }
+    .metric{
+      padding:10px 12px;
+      border-radius:12px;
+      background:var(--accent-soft);
+      border:1px solid rgba(87,136,153,.16);
+    }
+    .metric-label{
+      font-size:11px;
+      color:var(--muted);
+      margin-bottom:3px;
+    }
+    .metric-value{
+      font-size:16px;
+      font-weight:700;
+      color:var(--ink);
+    }
+    .metric-sub{
+      font-size:11px;
+      color:var(--muted);
+      margin-top:1px;
+    }
+    .result-heading{
+      font-size:13px;
+      font-weight:700;
+      margin:0 0 6px;
+    }
+    .note-card ul{
+      margin:6px 0 0 18px;
+      padding:0;
+      font-size:11px;
+      color:var(--muted);
+    }
+    .note-card li{margin-bottom:6px;} /* 行間を少し広げる */
+    .note-highlight{
+      border-radius:10px;
+      padding:10px;
+      background:#fffbe8;
+      border:1px solid #f5e2a0;
+      font-size:12px;
+      color:#6a4c0a;
+      margin-top:10px;
+      line-height: 1.5;
+    }
+    .app-footer{
+      padding:16px;
+      text-align:center;
+      font-size:10px;
+      color:var(--muted);
+    }
+    .hidden{display:none!important;}
+    
+    /* チュートリアルボタン */
+    .btn-tutorial{
+      appearance:none;
+      border:1px solid var(--border);
+      background:#ffffff;
+      border-radius:12px;
+      padding:8px 12px;
+      font-weight:700;
+      cursor:pointer;
+      color:var(--accent);
+      font-size:11px;
+      box-shadow:0 4px 10px rgba(15,23,42,.06);
+      white-space:nowrap;
+      transition:background .12s ease,box-shadow .12s ease,transform .12s ease,border-color .12s ease;
+      flex-shrink: 0;
+    }
+    .btn-tutorial:hover{
+      border-color:#94a3b8;
+      background:#f8fafc;
+      transform:translateY(-1px);
+      box-shadow:0 6px 14px rgba(15,23,42,.10);
+    }
+
+    /* --- フッター（ミニ版） --- */
+    footer.mk-mini{
+      margin:14px 0 12px;
+      font-size:11px;
+      color:#334155;
+      display:flex;
+      justify-content:center;
+      gap:8px;
+      flex-wrap:wrap;
+      line-height: 1.5;
+    }
+    footer.mk-mini a{
+      color:inherit;
+      text-decoration:underline;
+      text-underline-offset:2px;
+    }
+
+    /* ===== チュートリアル（オーバーレイ/ハイライト/パネル） ===== */
+    .mk-tour-mask{
+      position:fixed;inset:0;background:rgba(15,23,42,.56);
+      backdrop-filter:saturate(120%) blur(2px);
+      z-index:9998;
+    }
+    .mk-tour-focus{
+      position:fixed;border-radius:12px;
+      box-shadow:0 0 0 3px #fff, 0 0 0 6px rgba(87,136,153,.35), 0 10px 30px rgba(0,0,0,.35);
+      z-index:10001;
+      pointer-events:none;transition:transform .2s ease, width .2s ease, height .2s ease, left .2s ease, top .2s ease;
+    }
+    .mk-tour-panel{
+      position:fixed;z-index:10002;
+      max-width:min(560px, 92vw);background:#fff;border:1px solid var(--border);border-radius:16px;
+      box-shadow:0 14px 36px rgba(0,0,0,.22);padding:12px;
+    }
+    .mk-tour-head{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+    .mk-tour-step{font-size:12px;color:#475569}
+    .mk-tour-title{font-weight:800}
+    .mk-tour-body{font-size:14px;color:var(--ink)}
+    .mk-tour-actions{display:flex;justify-content:flex-end;gap:6px;margin-top:10px}
+    .mk-tour-actions .tbtn{border-radius:10px;border:1px solid var(--border);background:#fff;padding:6px 10px;font-weight:700;cursor:pointer;font-size:12px}
+    .mk-tour-actions .tbtn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+    .mk-tour-actions .tbtn:disabled{opacity:.55;cursor:not-allowed}
+    .mk-tour-elevate{
+      position:relative !important;
+      z-index:10000 !important;
+      isolation:isolate;
+    }
+    @media(max-width:600px){
+      .mk-tour-panel{left:12px;right:12px;max-width:calc(100vw - 24px);}
+    }
+
+    /* =========================================
+       スマホ表示最適化 (Mobile Optimization)
+       ========================================= */
+    @media (max-width: 600px) {
+      .layout {
+        padding: 12px; /* 画面端の余白を少し詰める */
+      }
+      .app-header {
+        padding: 10px 12px;
+      }
+      .brand-logo {
+        height: 32px; /* ロゴを少し小さくして圧迫感を減らす */
+      }
+      .brand-title {
+        font-size: 15px; /* タイトル文字サイズ調整 */
+      }
+      .brand-subtitle {
+        display: none; /* スマホではサブタイトルを非表示にしてスッキリさせる */
+      }
+      .card {
+        padding: 16px; /* カード内の余白調整 */
+        margin-bottom: 12px;
+      }
+      /* スイッチを横幅いっぱいに広げて押しやすく */
+      .pill-switch {
+        width: 100%;
+        display: flex;
+      }
+      .pill-switch label {
+        flex: 1;
+        padding: 8px 4px; /* 高さを確保 */
+      }
+      /* 入力欄の調整 */
+      input[type="text"], input[type="number"], select {
+        font-size: 16px; /* iOSズーム防止 */
+        padding: 12px;
+      }
+      /* 計算ボタンエリアを縦積みに */
+      .btn-row {
+        flex-direction: column;
+        align-items: stretch; /* 横幅いっぱいに */
+        gap: 12px;
+      }
+      .btn-calc {
+        width: 100%;
+        justify-content: center;
+        padding: 12px;
+      }
+      .btn-ghost {
+        width: 100%;
+      }
+      /* 下部アクションボタンの設定変更：横並びを維持 */
+      .action-buttons {
+        flex-direction: row; /* 縦積み(column)から横並び(row)へ変更 */
+        flex-wrap: nowrap; /* 折り返さない */
+        gap: 8px;
+      }
+      .btn-soft, .btn-outline {
+        width: auto; /* 幅固定を解除 */
+        flex: 1; /* 均等に広げる */
+        min-width: 0; /* 縮小可能に */
+        padding: 12px 4px; /* 余白を少し詰めて収める */
+        font-size: 11px; /* 文字サイズを少し小さく */
+      }
+      
+      /* ラジオボタンのチップも押しやすく */
+      .radio-row {
+        gap: 8px;
+      }
+      .radio-chip {
+        padding: 8px 12px;
+      }
+    }
+  </style>
+</head>
+<body>
+<div class="app">
+  <header class="app-header">
+    <div class="header-bar">
+      <a href="https://takatrp.github.io/tool-portal/" class="brand">
+        <!-- ロゴ画像のファイル名を変更 -->
+        <img src="./logo.jpg" alt="税理士法人松本会計事務所" class="brand-logo" />
+        <div class="brand-text">
+          <!-- MATSUMOTO KAKEI TOOLS は削除されました -->
+          <h1 class="brand-title">贈与税試算ツール</h1>
+          <p class="brand-subtitle">暦年課税（一般・特例）／相続時精算課税の概算シミュレーション</p>
+        </div>
+      </a>
+      <button type="button" class="btn-tutorial" id="startTour">チュートリアル</button>
+    </div>
+  </header>
+
+  <main class="layout">
+
+    <section class="card">
+      <div class="card-header">
+        <h2 class="card-title">STEP1 計算方法の選択</h2>
+        <div class="badge">令和7年4月1日現在法令等ベース</div>
+      </div>
+      <div class="card-body">
+        <div class="field">
+          <label>試算したい贈与税の計算方法</label>
+          <div class="pill-switch" id="modeSwitch">
+            <label>
+              <input type="radio" name="mode" value="annual" checked>
+              <span>暦年課税（一般・特例）</span>
+            </label>
+            <label>
+              <input type="radio" name="mode" value="seisan">
+              <span>相続時精算課税</span>
+            </label>
+          </div>
+          <small>※ 本ツールは 1人の受贈者について、1年間の贈与額を前提としています（申告書作成時は国税庁様式でご確認ください）。</small>
+        </div>
+      </div>
+    </section>
+
+    <section class="card" id="annualCard">
+      <div class="card-header">
+        <h2 class="card-title">STEP2-Ａ 暦年課税の入力</h2>
+      </div>
+      <div class="card-body">
+        <div class="field">
+          <label>贈与の区分</label>
+          <div class="radio-row">
+            <label class="radio-chip">
+              <input type="radio" name="annualMode" value="general" />
+              <span>一般贈与財産のみ</span>
+            </label>
+            <label class="radio-chip">
+              <input type="radio" name="annualMode" value="special" checked />
+              <span>特例贈与財産のみ（直系尊属→18歳以上の子・孫など）</span>
+            </label>
+            <label class="radio-chip">
+              <input type="radio" name="annualMode" value="both" />
+              <span>一般＋特例の両方あり</span>
+            </label>
+          </div>
+          <small>※ 特例贈与財産に該当するかどうかは、受贈者の年齢（1月1日時点18歳以上）と贈与者との関係（直系尊属かどうか）で判定されます。</small>
+        </div>
+
+        <div class="grid grid-2" style="margin-top:10px;" id="annualInputs">
+          <!-- 入力欄を type="text" inputmode="numeric" に変更し、リアルタイムカンマ表示に対応 -->
+          <div class="field annual-group annual-general-only hidden" id="annualGeneralOnly">
+            <label>一般贈与財産の年間贈与額</label>
+            <input type="text" inputmode="numeric" id="annualGeneralAmount" placeholder="例）3,000,000" class="yen-input" />
+            <small>兄弟姉妹・配偶者などからの贈与、または18歳未満の子・孫への贈与など。</small>
+          </div>
+          <div class="field annual-group annual-special-only" id="annualSpecialOnly">
+            <label>特例贈与財産の年間贈与額</label>
+            <input type="text" inputmode="numeric" id="annualSpecialAmount" placeholder="例）4,000,000" class="yen-input" />
+            <small>18歳以上の子・孫などが、父母・祖父母から受ける贈与（住宅取得資金等の特例は含みません）。</small>
+          </div>
+          <div class="field annual-group annual-both hidden" id="annualBothGeneral">
+            <label>一般贈与財産の年間贈与額（一般＋特例）</label>
+            <input type="text" inputmode="numeric" id="annualGeneralAmountBoth" placeholder="例）1,000,000" class="yen-input" />
+            <small>配偶者・兄弟姉妹などからの贈与分。</small>
+          </div>
+          <div class="field annual-group annual-both hidden" id="annualBothSpecial">
+            <label>特例贈与財産の年間贈与額（一般＋特例）</label>
+            <input type="text" inputmode="numeric" id="annualSpecialAmountBoth" placeholder="例）4,000,000" class="yen-input" />
+            <small>直系尊属からの贈与分。</small>
+          </div>
+        </div>
+
+        <div class="btn-row">
+          <button type="button" class="btn-calc" id="calcAnnualBtn">
+            <span class="btn-calc-icon">▶</span>
+            <span>暦年課税で試算する</span>
+          </button>
+          <button type="button" class="btn-ghost" id="annualClear">入力をクリア</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="card hidden" id="seisanCard">
+      <div class="card-header">
+        <h2 class="card-title">STEP2-Ｂ 相続時精算課税の入力</h2>
+      </div>
+      <div class="card-body">
+        <div class="grid grid-2">
+          <div class="field">
+            <label>今年 1年間の贈与額（特定贈与者 1人分）</label>
+            <input type="text" inputmode="numeric" id="seisanAmount" placeholder="例）5,000,000" class="yen-input" />
+            <small>相続時精算課税を選択した贈与者（父・母・祖父母など）ごとに入力してください。</small>
+          </div>
+          <div class="field">
+            <label>前年までに使用済みの特別控除額</label>
+            <input type="text" inputmode="numeric" id="seisanUsedSpecial" placeholder="例）12,000,000" class="yen-input" />
+            <small>2,500万円の特別控除のうち、既に控除に使った累計額（0〜25,000,000）。</small>
+          </div>
+        </div>
+        <div class="btn-row">
+          <button type="button" class="btn-calc" id="calcSeisanBtn">
+            <span class="btn-calc-icon">▶</span>
+            <span>相続時精算課税で試算する</span>
+          </button>
+          <button type="button" class="btn-ghost" id="seisanClear">入力をクリア</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="card result-card" id="resultCard">
+      <div class="card-header">
+        <h2 class="card-title">STEP3 試算結果</h2>
+      </div>
+      <div class="card-body">
+        <p id="resultSummary" class="result-heading">入力内容をもとに、贈与税額を概算しています。</p>
+        <div class="result-grid">
+          <div class="metric">
+            <div class="metric-label">概算贈与税額</div>
+            <div class="metric-value" id="resultTax">- 円</div>
+            <div class="metric-sub" id="resultTaxSub">（100円未満切捨て）</div>
+          </div>
+          <div class="metric">
+            <div class="metric-label">基礎控除後の課税価格</div>
+            <div class="metric-value" id="resultBase">- 円</div>
+            <div class="metric-sub" id="resultBaseSub">贈与総額 − 110万円</div>
+          </div>
+          <div class="metric" id="metricRate">
+            <div class="metric-label">適用税率・控除額（暦年課税）</div>
+            <div class="metric-value" id="resultRate">-</div>
+            <div class="metric-sub" id="resultRateSub">一般／特例ごとの速算表に基づき計算</div>
+          </div>
+          <div class="metric" id="metricSeisan">
+            <div class="metric-label">相続時精算課税：当年の特別控除利用額</div>
+            <div class="metric-value" id="resultSeisanSpecial">- 円</div>
+            <div class="metric-sub" id="resultSeisanSub">累計特別控除利用額：<span id="resultSeisanUsedTotal">- 円</span></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="card note-card" id="noteCard">
+      <div class="card-header">
+        <h2 class="card-title">ご利用上の注意</h2>
+      </div>
+      <div class="card-body">
+        <ul>
+          <li>本ツールは、令和7年4月1日現在の国税庁タックスアンサー（No.4408「贈与税の計算と税率（暦年課税）」、No.4103「相続時精算課税の選択」など）に基づき、贈与税額を概算するためのものです。</li>
+          <li>土地・建物、有価証券の評価、各種非課税枠（配偶者控除、住宅取得資金の非課税、教育資金一括贈与 等）、特例税率の適用判定、相続税への加算期間（7年）などは別途の検討が必要です。</li>
+          <li>相続時精算課税については、令和6年1月1日以後の贈与に創設された年110万円の基礎控除と、累計2,500万円の特別控除を前提としています。</li>
+          <li>複数の贈与者から相続時精算課税の贈与を受けている場合の基礎控除110万円の按分や、過去の制度下での贈与（令和5年以前）を含むケースは、別途詳細な計算が必要です。</li>
+        </ul>
+        <div class="note-highlight">
+          本ツールは税額の「概算」を把握することを目的としたものであり、申告書作成や申告是非の判断を直接行うものではありません。実務では、贈与の内容・時期・受贈者・贈与者の関係などを総合的に確認する必要があります。実際の贈与の実行・申告にあたっては、松本会計のスタッフにご相談ください。
+        </div>
+      </div>
+    </section>
+
+    <!-- 下部アクションボタン（デザイン変更済み） -->
+    <section class="card" id="bottomActions">
+      <div class="card-body">
+        <div class="action-buttons">
+          <button type="button" class="btn-soft" id="copyResultBtn">コピー</button>
+          <button type="button" class="btn-soft" id="resetAllBtn">リセット</button>
+          <button type="button" class="btn-outline" id="printBtn">印刷 / PDF保存</button>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ミニフッター -->
+  <footer class="mk-mini">
+    © <span id="cpy-year">2025</span>
+    <a href="https://www.matsumoto-kaikei.or.jp/" target="_blank" rel="noopener license">税理士法人松本会計事務所</a> ｜ 
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank" rel="license noopener">CC BY-NC-SA 4.0</a> ｜ 
+    <a href="/tool-portal/terms.html" target="_blank" rel="noopener">利用条件</a> ｜ 
+    <span id="build-rev">r2</span>（<span id="last-updated-date"></span>）
+  </footer>
+</div>
+
+<script>
+(function(){
+  'use strict';
+
+  const VERSION = 'r2';
+
+  // 年号 & 最終更新日（YYYY-MM-DD）を自動反映
+  (function syncFooterMeta(){
+    const yEl = document.getElementById('cpy-year');
+    const dEl = document.getElementById('last-updated-date');
+    const rEl = document.getElementById('build-rev');
+    if(yEl){ yEl.textContent = String(new Date().getFullYear()); }
+    if(dEl){
+      const d = new Date(document.lastModified);
+      const yyyy = String(d.getFullYear());
+      const mm = String(d.getMonth()+1).padStart(2,'0');
+      const dd = String(d.getDate()).padStart(2,'0');
+      dEl.textContent = `${yyyy}-${mm}-${dd}`;
+    }
+    if(rEl){ rEl.textContent = VERSION; }
+  })();
+
+  // 定数
+  const BASE_DEDUCTION = 1100000; // 暦年課税・相続時精算課税 共通の基礎控除額（110万円）
+  const SEISAN_SPECIAL_LIMIT = 25000000; // 相続時精算課税の特別控除限度額（2,500万円）
+
+  // 速算表
+  const GENERAL_BRACKETS = [
+    { upTo: 2000000, rate: 0.10, deduction: 0 },
+    { upTo: 3000000, rate: 0.15, deduction: 100000 },
+    { upTo: 4000000, rate: 0.20, deduction: 250000 },
+    { upTo: 6000000, rate: 0.30, deduction: 650000 },
+    { upTo: 10000000, rate: 0.40, deduction: 1250000 },
+    { upTo: 15000000, rate: 0.45, deduction: 1750000 },
+    { upTo: 30000000, rate: 0.50, deduction: 2500000 },
+    { upTo: Infinity, rate: 0.55, deduction: 4000000 }
+  ];
+
+  const SPECIAL_BRACKETS = [
+    { upTo: 2000000, rate: 0.10, deduction: 0 },
+    { upTo: 4000000, rate: 0.15, deduction: 100000 },
+    { upTo: 6000000, rate: 0.20, deduction: 300000 },
+    { upTo: 10000000, rate: 0.30, deduction: 900000 },
+    { upTo: 15000000, rate: 0.40, deduction: 1900000 },
+    { upTo: 30000000, rate: 0.45, deduction: 2650000 },
+    { upTo: 45000000, rate: 0.50, deduction: 4150000 },
+    { upTo: Infinity, rate: 0.55, deduction: 6400000 }
+  ];
+
+  // DOM取得
+  const modeRadios = document.querySelectorAll('input[name="mode"]');
+  const annualCard = document.getElementById('annualCard');
+  const seisanCard = document.getElementById('seisanCard');
+
+  const annualModeRadios = document.querySelectorAll('input[name="annualMode"]');
+  const annualGeneralOnly = document.getElementById('annualGeneralOnly');
+  const annualSpecialOnly = document.getElementById('annualSpecialOnly');
+  const annualBothGeneral = document.getElementById('annualBothGeneral');
+  const annualBothSpecial = document.getElementById('annualBothSpecial');
+
+  const annualGeneralAmount = document.getElementById('annualGeneralAmount');
+  const annualSpecialAmount = document.getElementById('annualSpecialAmount');
+  const annualGeneralAmountBoth = document.getElementById('annualGeneralAmountBoth');
+  const annualSpecialAmountBoth = document.getElementById('annualSpecialAmountBoth');
+
+  const seisanAmount = document.getElementById('seisanAmount');
+  const seisanUsedSpecial = document.getElementById('seisanUsedSpecial');
+
+  const calcAnnualBtn = document.getElementById('calcAnnualBtn');
+  const calcSeisanBtn = document.getElementById('calcSeisanBtn');
+  const annualClear = document.getElementById('annualClear');
+  const seisanClear = document.getElementById('seisanClear');
+
+  const resultSummary = document.getElementById('resultSummary');
+  const resultTax = document.getElementById('resultTax');
+  const resultTaxSub = document.getElementById('resultTaxSub');
+  const resultBase = document.getElementById('resultBase');
+  const resultBaseSub = document.getElementById('resultBaseSub');
+  const resultRate = document.getElementById('resultRate');
+  const resultRateSub = document.getElementById('resultRateSub');
+  const metricRate = document.getElementById('metricRate');
+  const metricSeisan = document.getElementById('metricSeisan');
+  const resultSeisanSpecial = document.getElementById('resultSeisanSpecial');
+  const resultSeisanUsedTotal = document.getElementById('resultSeisanUsedTotal');
+  const resultSeisanSub = document.getElementById('resultSeisanSub');
+
+  const copyResultBtn = document.getElementById('copyResultBtn');
+  const resetAllBtn = document.getElementById('resetAllBtn');
+  const printBtn = document.getElementById('printBtn');
+
+  // 全ての金額入力欄
+  const yenInputs = document.querySelectorAll('.yen-input');
+
+  // リアルタイムカンマ表示ロジック（カーソル制御機能付き）
+  yenInputs.forEach(input => {
+    input.addEventListener('input', function(e) {
+      // カーソル位置を取得
+      const cursor = this.selectionStart;
+      const val = this.value;
+      
+      // カーソルより左側にある数字の個数をカウント
+      const digitsBeforeCursor = (val.slice(0, cursor).match(/[0-9]/g) || []).length;
+
+      // 数字以外を除去
+      const raw = val.replace(/[^0-9]/g, '');
+      if (!raw) {
+        this.value = '';
+        return;
+      }
+
+      // カンマ整形
+      const formatted = Number(raw).toLocaleString('ja-JP');
+
+      // 値をセット
+      this.value = formatted;
+
+      // カーソル位置を復元
+      // 新しい文字列の中で、元の「数字の個数」と同じ場所を探す
+      let newCursor = 0;
+      let digitsSeen = 0;
+      for (let i = 0; i < formatted.length; i++) {
+        if (/[0-9]/.test(formatted[i])) {
+          digitsSeen++;
+        }
+        if (digitsSeen === digitsBeforeCursor) {
+          newCursor = i + 1;
+          break;
+        }
+      }
+      // 数字が見つからない（先頭など）場合は適切な位置へ
+      if (digitsBeforeCursor === 0) newCursor = 0;
+      
+      this.setSelectionRange(newCursor, newCursor);
+    });
+  });
+
+  // ユーティリティ
+  function parseYenInput(el){
+    if(!el) return 0;
+    // カンマとスペースを除去して数値化
+    const raw = (el.value || '').replace(/[,\s]/g,'');
+    if(!raw) return 0;
+    const n = Number(raw);
+    return Number.isFinite(n) ? Math.floor(n) : 0;
+  }
+
+  function formatYen(n){
+    if(!Number.isFinite(n)) return '-';
+    return n.toLocaleString('ja-JP');
+  }
+
+  function roundTax100(n){
+    if(!Number.isFinite(n) || n <= 0) return 0;
+    return Math.floor(n / 100) * 100;
+  }
+
+  // 課税価格の千円未満切捨て
+  function truncateToThousand(n){
+    if(!Number.isFinite(n) || n <= 0) return 0;
+    return Math.floor(n / 1000) * 1000;
+  }
+
+  function calcTaxFromTable(taxBase, brackets){
+    if(taxBase <= 0) return { tax:0, rate:null, deduction:null };
+    const b = brackets.find(br => taxBase <= br.upTo) || brackets[brackets.length - 1];
+    const tax = taxBase * b.rate - b.deduction;
+    return { tax: tax, rate: b.rate, deduction: b.deduction };
+  }
+
+  // ===== チュートリアル =====
+  const TOUR_KEY = 'gift_tax_tour_dismissed_v1';
+  const steps = [
+    {
+      sel: '.brand',
+      title: 'ツール概要',
+      body: 'このツールでは、暦年課税（一般・特例）と相続時精算課税について、1人の受贈者あたり1年間の贈与税額を概算できます。'
+    },
+    {
+      sel: '#modeSwitch',
+      title: 'STEP1：計算方法の選択',
+      body: '暦年課税か相続時精算課税かを選択します。通常の年間贈与は「暦年課税（一般・特例）」を使います。'
+    },
+    {
+      sel: '#annualCard',
+      title: 'STEP2-A：暦年課税の入力',
+      body: '暦年課税を選んだ場合は、贈与の区分を選び、一般贈与財産／特例贈与財産の年間贈与額を入力します。'
+    },
+    {
+      sel: '#seisanCard',
+      title: 'STEP2-B：相続時精算課税の入力',
+      body: '相続時精算課税を選んだ場合は、特定贈与者ごとに今年の贈与額と、これまでに使用した特別控除額を入力します。'
+    },
+    {
+      sel: '#resultCard',
+      title: 'STEP3：試算結果の確認',
+      body: '概算贈与税額、基礎控除後の課税価格、適用税率（暦年課税）や特別控除の利用状況（相続時精算課税）を確認できます。'
+    },
+    {
+      sel: '#noteCard',
+      title: 'ご利用上の注意',
+      body: '実際に贈与を行う前や申告に進む前に、「ご利用上の注意」を必ず確認し、不明点は松本会計のスタッフにご相談ください。'
+    }
+  ];
+
+  let tourIndex = 0;
+  let maskEl, focusEl, panelEl, prevBtn, nextBtn, skipBtn, titleEl2, bodyEl2, stepEl2;
+  let elevatedEl = null;
+
+  const qs = sel => document.querySelector(sel);
+  const vv = () => window.visualViewport || null;
+  const vvOffsetX = () => { const v = vv(); return v ? v.offsetLeft : 0; };
+  const vvOffsetY = () => { const v = vv(); return v ? v.offsetTop : 0; };
+  const vvWidth = () => { const v = vv(); return v ? v.width : window.innerWidth; };
+  const vvHeight = () => { const v = vv(); return v ? v.height : window.innerHeight; };
+
+  function stableScrollIntoView(el){
+    return new Promise(resolve => {
+      if(!el){ resolve(); return; }
+      let done = false;
+      const timer = setTimeout(() => {
+        if(done) return;
+        done = true;
+        resolve();
+      }, 350);
+      const finish = () => {
+        if(done) return;
+        done = true;
+        clearTimeout(timer);
+        resolve();
+      };
+      const onEnd = () => {
+        window.removeEventListener('scrollend', onEnd);
+        finish();
+      };
+      window.addEventListener('scrollend', onEnd, { once:true });
+      el.scrollIntoView({ block:'center', behavior:'smooth' });
+      requestAnimationFrame(() => requestAnimationFrame(() => {}));
+    });
+  }
+
+  function rectInVisualViewport(el){
+    const r = el.getBoundingClientRect();
+    const x = Math.round(r.left + vvOffsetX());
+    const y = Math.round(r.top + vvOffsetY());
+    const w = Math.round(Math.min(r.width, vvWidth() - 16));
+    const h = Math.round(Math.min(r.height, vvHeight() - 16));
+    const pad = 8;
+    return {
+      x: Math.max(8 + vvOffsetX(), x - pad),
+      y: Math.max(8 + vvOffsetY(), y - pad),
+      w: Math.max(24, w + pad * 2),
+      h: Math.max(24, h + pad * 2)
+    };
+  }
+
+  function placeFocus(){
+    if(!panelEl || !focusEl) return;
+    const step = steps[tourIndex];
+    
+    // モード自動切替
+    if(step.sel === '#annualCard'){
+      const r = document.querySelector('input[name="mode"][value="annual"]');
+      if(r && !r.checked){
+        r.checked = true;
+        updateMode();
+      }
+    }else if(step.sel === '#seisanCard'){
+      const r = document.querySelector('input[name="mode"][value="seisan"]');
+      if(r && !r.checked){
+        r.checked = true;
+        updateMode();
+      }
+    }
+
+    const target = qs(step.sel);
+    if(!target) return;
+
+    if(elevatedEl && elevatedEl !== target){
+      elevatedEl.classList.remove('mk-tour-elevate');
+    }
+    target.classList.add('mk-tour-elevate');
+    elevatedEl = target;
+
+    const r = rectInVisualViewport(target);
+    focusEl.style.left = r.x + 'px';
+    focusEl.style.top = r.y + 'px';
+    focusEl.style.width = r.w + 'px';
+    focusEl.style.height = r.h + 'px';
+
+    const panelW = Math.min(560, vvWidth() * 0.92);
+    const margin = 12;
+    const belowY = r.y + r.h + margin;
+    const aboveY = Math.max(8 + vvOffsetY(), r.y - margin - 170);
+    let px = Math.min(Math.max(8 + vvOffsetX(), r.x), vvOffsetX() + vvWidth() - panelW - 8);
+    let py = (belowY + 190 < vvOffsetY() + vvHeight()) ? belowY : aboveY;
+
+    panelEl.style.left = px + 'px';
+    panelEl.style.top = py + 'px';
+    panelEl.style.maxWidth = panelW + 'px';
+
+    stepEl2.textContent = 'STEP ' + (tourIndex + 1) + ' / ' + steps.length;
+    titleEl2.textContent = step.title;
+    bodyEl2.innerHTML = step.body;
+
+    prevBtn.disabled = tourIndex === 0;
+    nextBtn.textContent = (tourIndex === steps.length - 1) ? '完了' : '次へ';
+  }
+
+  function ensureEls(){
+    if(maskEl) return;
+    maskEl = document.createElement('div');
+    maskEl.className = 'mk-tour-mask';
+    maskEl.tabIndex = -1;
+    focusEl = document.createElement('div');
+    focusEl.className = 'mk-tour-focus';
+    focusEl.setAttribute('aria-hidden','true');
+    panelEl = document.createElement('div');
+    panelEl.className = 'mk-tour-panel';
+    const head = document.createElement('div');
+    head.className = 'mk-tour-head';
+    stepEl2 = document.createElement('div');
+    stepEl2.className = 'mk-tour-step';
+    titleEl2 = document.createElement('div');
+    titleEl2.className = 'mk-tour-title';
+    head.append(stepEl2, titleEl2);
+    bodyEl2 = document.createElement('div');
+    bodyEl2.className = 'mk-tour-body';
+    const actions = document.createElement('div');
+    actions.className = 'mk-tour-actions';
+    prevBtn = document.createElement('button');
+    prevBtn.className = 'tbtn';
+    prevBtn.textContent = '前へ';
+    skipBtn = document.createElement('button');
+    skipBtn.className = 'tbtn';
+    skipBtn.textContent = 'スキップ';
+    nextBtn = document.createElement('button');
+    nextBtn.className = 'tbtn primary';
+    nextBtn.textContent = '次へ';
+    actions.append(prevBtn, skipBtn, nextBtn);
+    panelEl.append(head, bodyEl2, actions);
+    document.body.append(maskEl, focusEl, panelEl);
+
+    skipBtn.addEventListener('click', endTour);
+    prevBtn.addEventListener('click', async () => {
+      if(tourIndex > 0){
+        tourIndex--;
+        placeFocus();
+        await stableScrollIntoView(qs(steps[tourIndex].sel));
+        placeFocus();
+      }
+    });
+    nextBtn.addEventListener('click', async () => {
+      if(tourIndex < steps.length - 1){
+        tourIndex++;
+        placeFocus();
+        await stableScrollIntoView(qs(steps[tourIndex].sel));
+        placeFocus();
+      }else{
+        endTour();
+      }
+    });
+    document.addEventListener('keydown', function(e){
+      if(!panelEl || panelEl.style.display === 'none') return;
+      if(e.key === 'Escape'){
+        endTour();
+      }else if(e.key === 'ArrowRight'){
+        nextBtn.click();
+      }else if(e.key === 'ArrowLeft'){
+        prevBtn.click();
+      }
+    });
+    maskEl.addEventListener('click', () => {
+      nextBtn.click();
+    });
+    const v = vv();
+    if(v){
+      v.addEventListener('resize', placeFocus);
+      v.addEventListener('scroll', placeFocus);
+    }
+    window.addEventListener('resize', placeFocus, { passive:true });
+    window.addEventListener('scroll', placeFocus, { passive:true });
+    window.addEventListener('orientationchange', () => setTimeout(placeFocus, 100));
+  }
+
+  function trackTutorial(eventName, params){
+    try{
+      if(typeof window.gtag === 'function'){
+        window.gtag('event', eventName, params || {});
+      }
+    }catch(e){}
+  }
+
+  async function startTour(idx){
+    if(typeof idx !== 'number') idx = 0;
+    trackTutorial('tutorial_start',{ step: idx + 1 });
+    ensureEls();
+    tourIndex = idx;
+    maskEl.style.display = 'block';
+    focusEl.style.display = 'block';
+    panelEl.style.display = 'block';
+    document.body.style.overflow = 'hidden';
+    placeFocus();
+    const target = qs(steps[tourIndex].sel);
+    if(target){
+      await stableScrollIntoView(target);
+    }
+    requestAnimationFrame(() => {
+      requestAnimationFrame(placeFocus);
+    });
+    nextBtn.focus();
+  }
+
+  function endTour(){
+    trackTutorial('tutorial_end',{ completed: tourIndex === steps.length - 1 });
+    if(maskEl) maskEl.style.display = 'none';
+    if(focusEl) focusEl.style.display = 'none';
+    if(panelEl) panelEl.style.display = 'none';
+    document.body.style.overflow = '';
+    if(elevatedEl){
+      elevatedEl.classList.remove('mk-tour-elevate');
+      elevatedEl = null;
+    }
+    try{
+      localStorage.setItem(TOUR_KEY,'1');
+    }catch(e){}
+  }
+
+  const tourBtn = document.getElementById('startTour');
+  if(tourBtn){
+    tourBtn.addEventListener('click', () => {
+      startTour(0);
+    });
+  }
+
+  // モード切替
+  function updateMode(){
+    const mode = document.querySelector('input[name="mode"]:checked')?.value || 'annual';
+    if(mode === 'annual'){
+      annualCard.classList.remove('hidden');
+      seisanCard.classList.add('hidden');
+      metricRate.classList.remove('hidden');
+      metricSeisan.classList.add('hidden');
+      resultSummary.textContent = '暦年課税（一般税率・特例税率）による贈与税額の概算結果です。';
+      resultBaseSub.textContent = '暦年課税：年間の贈与額の合計 − 110万円（基礎控除）を控除した後の課税価格（千円未満切捨て）';
+      resultRateSub.textContent = '国税庁 速算表（一般贈与財産用／特例贈与財産用）に基づき計算';
+      resultTaxSub.textContent = '暦年課税：課税価格は千円未満切捨て／税額は100円未満切捨ての概算額です。';
+    }else{
+      annualCard.classList.add('hidden');
+      seisanCard.classList.remove('hidden');
+      metricRate.classList.add('hidden');
+      metricSeisan.classList.remove('hidden');
+      resultSummary.textContent = '相続時精算課税（年110万円の基礎控除＋特別控除2,500万円）による贈与税額の概算結果です。';
+      resultBaseSub.textContent = '相続時精算課税：基礎控除110万円・特別控除適用後の課税価格（千円未満切捨て）';
+      resultTaxSub.textContent = '相続時精算課税：課税価格は千円未満切捨て／税額は20％・100円未満切捨ての概算額です。';
+    }
+  }
+
+  // 暦年課税：入力欄の切替
+  function updateAnnualInputs(){
+    const mode = document.querySelector('input[name="annualMode"]:checked')?.value || 'special';
+    [annualGeneralOnly, annualSpecialOnly, annualBothGeneral, annualBothSpecial].forEach(el => el.classList.add('hidden'));
+    if(mode === 'general'){
+      annualGeneralOnly.classList.remove('hidden');
+    }else if(mode === 'special'){
+      annualSpecialOnly.classList.remove('hidden');
+    }else{
+      annualBothGeneral.classList.remove('hidden');
+      annualBothSpecial.classList.remove('hidden');
+    }
+  }
+
+  // 暦年課税の計算
+  function handleCalcAnnual(){
+    const mode = document.querySelector('input[name="annualMode"]:checked')?.value || 'special';
+    let generalTotal = 0;
+    let specialTotal = 0;
+    let taxBase = 0;
+    let taxAmount = 0;
+    let summaryText = '';
+    let rateText = '-';
+
+    if(mode === 'general'){
+      generalTotal = parseYenInput(annualGeneralAmount);
+      const total = generalTotal;
+      if(total <= 0){
+        resetResult();
+        resultSummary.textContent = '一般贈与財産の金額を入力してください。';
+        return;
+      }
+      taxBase = Math.max(0, total - BASE_DEDUCTION);
+      taxBase = truncateToThousand(taxBase);
+      const general = calcTaxFromTable(taxBase, GENERAL_BRACKETS);
+      taxAmount = roundTax100(general.tax);
+      summaryText = '一般贈与財産のみ（暦年課税）として試算しています。';
+      rateText = general.rate ? (Math.round(general.rate * 100) + '%／控除額 ' + formatYen(general.deduction) + '円') : '-';
+
+    }else if(mode === 'special'){
+      specialTotal = parseYenInput(annualSpecialAmount);
+      const total = specialTotal;
+      if(total <= 0){
+        resetResult();
+        resultSummary.textContent = '特例贈与財産の金額を入力してください。';
+        return;
+      }
+      taxBase = Math.max(0, total - BASE_DEDUCTION);
+      taxBase = truncateToThousand(taxBase);
+      const special = calcTaxFromTable(taxBase, SPECIAL_BRACKETS);
+      taxAmount = roundTax100(special.tax);
+      summaryText = '特例贈与財産のみ（暦年課税）として試算しています。';
+      rateText = special.rate ? (Math.round(special.rate * 100) + '%／控除額 ' + formatYen(special.deduction) + '円') : '-';
+
+    }else{
+      generalTotal = parseYenInput(annualGeneralAmountBoth);
+      specialTotal = parseYenInput(annualSpecialAmountBoth);
+      const total = generalTotal + specialTotal;
+      if(total <= 0){
+        resetResult();
+        resultSummary.textContent = '一般贈与財産・特例贈与財産のいずれかに金額を入力してください。';
+        return;
+      }
+      taxBase = Math.max(0, total - BASE_DEDUCTION);
+      taxBase = truncateToThousand(taxBase);
+      if(taxBase <= 0){
+        taxAmount = 0;
+        summaryText = '年間の贈与額の合計が基礎控除額（110万円）以下のため、贈与税はかかりません（暦年課税）。';
+        rateText = '-';
+      }else{
+        const asGeneral = calcTaxFromTable(taxBase, GENERAL_BRACKETS);
+        const asSpecial = calcTaxFromTable(taxBase, SPECIAL_BRACKETS);
+        const totalTaxGeneral = asGeneral.tax;
+        const totalTaxSpecial = asSpecial.tax;
+
+        const shareGeneral = generalTotal / (generalTotal + specialTotal || 1);
+        const shareSpecial = specialTotal / (generalTotal + specialTotal || 1);
+
+        const taxGeneralPortion = totalTaxGeneral * shareGeneral;
+        const taxSpecialPortion = totalTaxSpecial * shareSpecial;
+
+        taxAmount = roundTax100(taxGeneralPortion + taxSpecialPortion);
+
+        summaryText = '一般贈与財産と特例贈与財産の両方があるため、国税庁の計算例に基づき按分計算を行っています。';
+        rateText = '一般税率・特例税率による按分計算（合計課税価格 ' + formatYen(taxBase) + '円ベース）';
+      }
+    }
+
+    resultTax.textContent = formatYen(taxAmount) + ' 円';
+    resultTaxSub.textContent = '暦年課税：課税価格は千円未満切捨て／税額は100円未満切捨ての概算額です。';
+    resultBase.textContent = formatYen(taxBase) + ' 円';
+    resultSummary.textContent = summaryText;
+    resultRate.textContent = rateText;
+
+    metricSeisan.classList.add('hidden');
+    metricRate.classList.remove('hidden');
+    resultSeisanSpecial.textContent = '- 円';
+    resultSeisanUsedTotal.textContent = '- 円';
+    resultSeisanSub.textContent = '累計特別控除利用額：- 円';
+  }
+
+  // 相続時精算課税の計算
+  function handleCalcSeisan(){
+    const amount = parseYenInput(seisanAmount);
+    let usedBefore = parseYenInput(seisanUsedSpecial);
+
+    if(amount <= 0){
+      resetResult();
+      resultSummary.textContent = '相続時精算課税の対象となる当年の贈与額を入力してください。';
+      return;
+    }
+
+    if(usedBefore < 0) usedBefore = 0;
+    if(usedBefore > SEISAN_SPECIAL_LIMIT) usedBefore = SEISAN_SPECIAL_LIMIT;
+
+    const baseAfterKiso = Math.max(0, amount - BASE_DEDUCTION);
+    const remainingSpecial = Math.max(0, SEISAN_SPECIAL_LIMIT - usedBefore);
+    const specialThisYear = Math.min(baseAfterKiso, remainingSpecial);
+    const taxableAfterSpecial = Math.max(0, baseAfterKiso - specialThisYear);
+
+    const taxBase = truncateToThousand(taxableAfterSpecial);
+    const rawTax = taxBase * 0.20;
+    const tax = roundTax100(rawTax);
+    const usedAfter = usedBefore + specialThisYear;
+
+    resultTax.textContent = formatYen(tax) + ' 円';
+    resultTaxSub.textContent = '相続時精算課税：課税価格は千円未満切捨て／税額は20％・100円未満切捨ての概算額です。';
+    resultBase.textContent = formatYen(taxBase) + ' 円';
+    resultBaseSub.textContent = '当年の贈与額 − 110万円 − 特別控除額等を控除した後の課税価格（千円未満切捨て）';
+    resultSummary.textContent = '相続時精算課税（特定贈与者 1人分）として、基礎控除110万円と特別控除2,500万円の残額を考慮して試算しています。';
+
+    metricRate.classList.add('hidden');
+    metricSeisan.classList.remove('hidden');
+    resultRate.textContent = '-';
+
+    resultSeisanSpecial.textContent = formatYen(specialThisYear) + ' 円';
+    resultSeisanUsedTotal.textContent = formatYen(usedAfter) + ' 円';
+    resultSeisanSub.textContent = '累計特別控除利用額：' + formatYen(usedAfter) + ' 円（上限 25,000,000 円）';
+  }
+
+  function resetResult(){
+    resultTax.textContent = '- 円';
+    resultTaxSub.textContent = '（課税価格は千円未満切捨て／税額は100円未満切捨て）';
+    resultBase.textContent = '- 円';
+    resultBaseSub.textContent = '基礎控除等控除後の課税価格（千円未満切捨て前）';
+    resultRate.textContent = '-';
+    resultSeisanSpecial.textContent = '- 円';
+    resultSeisanUsedTotal.textContent = '- 円';
+    resultSeisanSub.textContent = '累計特別控除利用額：- 円';
+  }
+
+  function clearAnnual(){
+    [annualGeneralAmount, annualSpecialAmount, annualGeneralAmountBoth, annualSpecialAmountBoth].forEach(el => {
+      if(el) el.value = '';
+    });
+    resetResult();
+  }
+
+  function clearSeisan(){
+    if(seisanAmount) seisanAmount.value = '';
+    if(seisanUsedSpecial) seisanUsedSpecial.value = '';
+    resetResult();
+  }
+
+  // 結果コピー
+  function fallbackCopy(text){
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    ta.style.position = 'fixed';
+    ta.style.left = '-9999px';
+    document.body.appendChild(ta);
+    ta.focus();
+    ta.select();
+    try{
+      document.execCommand('copy');
+      alert('試算結果をコピーしました。');
+    }catch(e){
+      alert('コピーに失敗しました。');
+    }
+    document.body.removeChild(ta);
+  }
+
+  function handleCopyResult(){
+    const mode = document.querySelector('input[name="mode"]:checked')?.value || 'annual';
+    const lines = [];
+    const summary = (resultSummary.textContent || '').trim();
+
+    lines.push('【贈与税試算結果】');
+    if(summary) lines.push(summary);
+    lines.push('');
+    lines.push('概算贈与税額：' + (resultTax.textContent || '').trim());
+    lines.push('基礎控除後の課税価格：' + (resultBase.textContent || '').trim());
+
+    if(mode === 'annual'){
+      lines.push('適用税率・控除額：' + (resultRate.textContent || '').trim());
+    }else{
+      lines.push('当年特別控除利用額：' + (resultSeisanSpecial.textContent || '').trim());
+      lines.push((resultSeisanSub.textContent || '').trim());
+    }
+    lines.push('');
+    lines.push('※本ツールは税額の「概算」を把握するためのものであり、実際の贈与の実行・申告にあたっては専門家にご相談ください。');
+
+    const text = lines.join('\n');
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(text)
+        .then(() => { alert('試算結果をコピーしました。'); })
+        .catch(() => { fallbackCopy(text); });
+    }else{
+      fallbackCopy(text);
+    }
+  }
+
+  // 全体リセット
+  function handleResetAll(){
+    const modeAnnual = document.querySelector('input[name="mode"][value="annual"]');
+    if(modeAnnual){ modeAnnual.checked = true; }
+    const annualSpecialRadio = document.querySelector('input[name="annualMode"][value="special"]');
+    if(annualSpecialRadio){ annualSpecialRadio.checked = true; }
+
+    updateMode();
+    updateAnnualInputs();
+    clearAnnual();
+    clearSeisan();
+    resetResult();
+    window.scrollTo({ top:0, behavior:'smooth' });
+  }
+
+  // 印刷
+  function handlePrint(){
+    window.print();
+  }
+
+  // イベント設定
+  modeRadios.forEach(r => r.addEventListener('change', updateMode));
+  annualModeRadios.forEach(r => r.addEventListener('change', updateAnnualInputs));
+  if(calcAnnualBtn) calcAnnualBtn.addEventListener('click', handleCalcAnnual);
+  if(calcSeisanBtn) calcSeisanBtn.addEventListener('click', handleCalcSeisan);
+  if(annualClear) annualClear.addEventListener('click', clearAnnual);
+  if(seisanClear) seisanClear.addEventListener('click', clearSeisan);
+
+  if(copyResultBtn) copyResultBtn.addEventListener('click', handleCopyResult);
+  if(resetAllBtn) resetAllBtn.addEventListener('click', handleResetAll);
+  if(printBtn) printBtn.addEventListener('click', handlePrint);
+
+  // 初期表示
+  updateMode();
+  updateAnnualInputs();
+  resetResult();
+})();
+</script>
+
+</body>
+</html>
