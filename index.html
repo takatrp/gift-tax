@@ -1026,7 +1026,7 @@
     <a href="https://www.matsumoto-kaikei.or.jp/" target="_blank" rel="noopener license">税理士法人松本会計事務所</a> ｜ 
     <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank" rel="license noopener">CC BY-NC-SA 4.0</a> ｜ 
     <a href="/tool-portal/terms.html" target="_blank" rel="noopener">利用条件</a> ｜ 
-    <span id="build-rev">v1.4 Final</span>（<span id="last-updated-date"></span>）
+    <span id="build-rev">v1.5 Final</span>（<span id="last-updated-date"></span>）
   </footer>
 </div>
 
@@ -1034,7 +1034,7 @@
 (function(){
   'use strict';
 
-  const VERSION = 'v1.4 Final';
+  const VERSION = 'v1.5 Final';
 
   // 年号 & 最終更新日を自動反映
   (function syncFooterMeta(){
@@ -1141,7 +1141,6 @@
   const multiEstateTotal = document.getElementById('multiEstateTotal');
   const multiYears = document.getElementById('multiYears');
   const multiReturnRate = document.getElementById('multiReturnRate');
-  // multiEffRate (想定相続税実効税率) のDOM取得は削除
   const multiRecipients = document.getElementById('multiRecipients'); 
 
   const multiAnnualGiftPerPerson = document.getElementById('multiAnnualGiftPerPerson');
@@ -1253,7 +1252,7 @@
     return Number.isFinite(n) ? n : defaultValue;
   }
 
-  // 新しい相続税計算関数（法定相続分按分方式）
+  // 新しい相続税計算関数
   function calcInheritanceTaxAmount(estateTotal, heirsCount) {
     if (estateTotal <= 0 || heirsCount <= 0) return 0;
     const deduction = 30000000 + 6000000 * heirsCount;
@@ -1349,6 +1348,10 @@
 
   function placeFocus(){
     if(!panelEl || !focusEl) return;
+    
+    // 修正: チュートリアル非表示なら何もしない
+    if(panelEl.style.display === 'none') return;
+
     const step = steps[tourIndex];
 
     if(step.sel === '#modeSwitch'){
@@ -1438,7 +1441,6 @@
         placeFocus();
       }
     });
-    // 修正: エンターキーでも進む
     nextBtn.addEventListener('click', async () => {
       if(tourIndex < steps.length - 1){
         tourIndex++;
@@ -1449,13 +1451,19 @@
         endTour();
       }
     });
+    // キーボード操作の修正
     document.addEventListener('keydown', function(e){
+      // パネルが表示されていない時は無視
       if(!panelEl || panelEl.style.display === 'none') return;
+      
       if(e.key === 'Escape'){
         endTour();
-      }else if(e.key === 'ArrowRight' || e.key === 'Enter'){ // Enterキー追加
+        e.preventDefault();
+      }else if(e.key === 'ArrowRight' || e.key === 'Enter'){
+        e.preventDefault(); // ボタンフォーカス時の重複発火防止
         nextBtn.click();
       }else if(e.key === 'ArrowLeft'){
+        e.preventDefault();
         prevBtn.click();
       }
     });
