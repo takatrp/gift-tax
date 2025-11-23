@@ -35,7 +35,6 @@
     html,body{height:100%;}
     body{
       margin:0;
-      /* ベースのフォントサイズを15pxに拡大 */
       font-size: 15px;
       font-family:-apple-system,BlinkMacSystemFont,"Hiragino Kaku Gothic ProN","Yu Gothic","Noto Sans JP",Segoe UI,Roboto,Arial,sans-serif;
       background:var(--bg);
@@ -76,7 +75,7 @@
       min-width: 0;
     }
     .brand-logo{
-      height:44px; /* ロゴも少し大きく */
+      height:44px;
       width:auto;
       display:block;
       border-radius:12px;
@@ -91,9 +90,8 @@
       gap:2px;
       min-width: 0;
     }
-    /* タイトルのMATSUMOTO...はHTML側で削除済み */
     .brand-title{
-      font-size:20px; /* タイトルサイズアップ */
+      font-size:22px; /* タイトルサイズを大きく */
       margin:0;
       font-weight:700;
       white-space: nowrap;
@@ -102,7 +100,7 @@
     }
     .brand-subtitle{
       margin:0;
-      font-size:12px; /* サブタイトルサイズアップ */
+      font-size:12px;
       color:var(--muted);
       white-space: nowrap;
       overflow: hidden;
@@ -119,7 +117,7 @@
       background:var(--card);
       border-radius:var(--radius-lg);
       box-shadow:var(--shadow);
-      padding:24px; /* 余白を広げる */
+      padding:24px;
       margin-bottom:20px;
       border:1px solid rgba(255,255,255,.8);
     }
@@ -133,7 +131,7 @@
     }
     .card-title{
       margin:0;
-      font-size:18px; /* 見出しサイズアップ */
+      font-size:18px;
       font-weight:700;
       display:flex;
       align-items:center;
@@ -145,7 +143,7 @@
       padding:4px 10px;
       border-radius:var(--radius-pill);
       border:1px solid rgba(255,255,255,.8);
-      font-size:11px; /* バッジサイズアップ */
+      font-size:11px;
       background:rgba(0,0,0,.2);
       white-space: nowrap;
     }
@@ -164,7 +162,7 @@
       justify-content:center;
       padding:8px 16px;
       border-radius:var(--radius-pill);
-      font-size:14px; /* スイッチ文字サイズアップ */
+      font-size:14px;
       cursor:pointer;
       white-space:nowrap;
       color:var(--muted);
@@ -181,7 +179,7 @@
       padding:8px 16px;
     }
     .card-body{
-      font-size:15px; /* 本文サイズアップ */
+      font-size:15px;
       color:var(--muted);
     }
     .grid{
@@ -199,12 +197,12 @@
       gap:6px;
     }
     .field label{
-      font-size:14px; /* ラベルサイズアップ */
-      font-weight:700; /* より太く */
+      font-size:14px;
+      font-weight:700;
       color:var(--ink);
     }
     .field small{
-      font-size:12px; /* 注釈サイズアップ */
+      font-size:12px;
       color:var(--muted);
       line-height: 1.5;
     }
@@ -215,7 +213,7 @@
       border-radius:10px;
       border:1px solid var(--border);
       padding:12px;
-      font-size:16px; /* 16pxあれば読みやすい */
+      font-size:16px;
       font-family:inherit;
       outline:none;
       width:100%;
@@ -244,7 +242,7 @@
       border-radius:var(--radius-pill);
       border:1px solid var(--border);
       background:#f7fafb;
-      font-size:13px; /* チップサイズアップ */
+      font-size:13px;
       color:var(--muted);
       cursor:pointer;
       transition: all 0.2s ease;
@@ -285,7 +283,7 @@
       border:none;
       border-radius:var(--radius-pill);
       padding:12px 28px;
-      font-size:15px; /* ボタン文字サイズアップ */
+      font-size:15px;
       font-weight:700;
       background:var(--accent);
       color:#fff;
@@ -314,7 +312,7 @@
       padding:10px 20px;
       border:1px dashed var(--border);
       background:transparent;
-      font-size:14px; /* 文字サイズアップ */
+      font-size:14px;
       color:var(--muted);
       cursor:pointer;
       display: flex;
@@ -338,7 +336,7 @@
       color: var(--btn-soft-text);
       border-radius: 8px;
       padding: 14px;
-      font-size: 15px; /* 文字サイズアップ */
+      font-size: 15px;
       font-weight: 700;
       cursor: pointer;
       text-align: center;
@@ -362,7 +360,7 @@
       color: var(--btn-outline-border);
       border-radius: 8px;
       padding: 13px;
-      font-size: 15px; /* 文字サイズアップ */
+      font-size: 15px;
       font-weight: 700;
       cursor: pointer;
       text-align: center;
@@ -397,30 +395,47 @@
       background:var(--accent-soft);
       border:1px solid rgba(87,136,153,.16);
     }
+    
+    /* 強調表示用のスタイル（人件費削減ボックス風） */
+    .metric-featured {
+      background: #fff;
+      border: 2px solid var(--accent);
+      box-shadow: 0 4px 12px rgba(87,136,153,.15);
+    }
+    .metric-featured .metric-label {
+      color: var(--accent);
+      font-weight: 700;
+    }
+    .metric-featured .metric-value {
+      font-size: 28px; /* さらに大きく */
+      color: var(--accent);
+      line-height: 1.3;
+    }
+
     .metric-label{
-      font-size:13px; /* ラベルサイズアップ */
+      font-size:13px;
       color:var(--muted);
       margin-bottom:4px;
     }
     .metric-value{
-      font-size:20px; /* 値を大きく強調 */
+      font-size:20px;
       font-weight:700;
       color:var(--ink);
     }
     .metric-sub{
-      font-size:12px; /* 文字サイズアップ */
+      font-size:12px;
       color:var(--muted);
       margin-top:2px;
     }
     .result-heading{
-      font-size:16px; /* 見出しサイズアップ */
+      font-size:16px;
       font-weight:700;
       margin:0 0 8px;
     }
     .note-card ul{
       margin:6px 0 0 20px;
       padding:0;
-      font-size:13px; /* 文字サイズアップ */
+      font-size:13px;
       color:var(--muted);
     }
     .note-card li{margin-bottom:6px;}
@@ -429,7 +444,7 @@
       padding:12px;
       background:#fffbe8;
       border:1px solid #f5e2a0;
-      font-size:13px; /* 文字サイズアップ */
+      font-size:13px;
       color:#6a4c0a;
       margin-top:12px;
       line-height: 1.6;
@@ -437,7 +452,7 @@
     .app-footer{
       padding:20px;
       text-align:center;
-      font-size:12px; /* フッターも少し大きく */
+      font-size:12px;
       color:var(--muted);
     }
     .hidden{display:none!important;}
@@ -452,7 +467,7 @@
       font-weight:700;
       cursor:pointer;
       color:var(--accent);
-      font-size:13px; /* 文字サイズアップ */
+      font-size:13px;
       box-shadow:0 4px 10px rgba(15,23,42,.06);
       white-space:nowrap;
       transition:background .12s ease,box-shadow .12s ease,transform .12s ease,border-color .12s ease;
@@ -468,7 +483,7 @@
     /* --- フッター（ミニ版） --- */
     footer.mk-mini{
       margin:16px 0 16px;
-      font-size:12px; /* 11px -> 12px */
+      font-size:12px;
       color:#334155;
       display:flex;
       justify-content:center;
@@ -482,7 +497,7 @@
       text-underline-offset:2px;
     }
 
-    /* ===== チュートリアル関連（省略せず維持） ===== */
+    /* ===== チュートリアル関連 ===== */
     .mk-tour-mask{
       position:fixed;inset:0;background:rgba(15,23,42,.56);
       backdrop-filter:saturate(120%) blur(2px);
@@ -527,10 +542,10 @@
         padding: 10px 12px;
       }
       .brand-logo {
-        height: 36px; /* 少し調整 */
+        height: 36px;
       }
       .brand-title {
-        font-size: 16px; /* スマホでも少し大きめに */
+        font-size: 18px; /* タイトル文字サイズ調整 */
       }
       .brand-subtitle {
         display: none;
@@ -577,7 +592,7 @@
         flex: 1;
         min-width: 0;
         padding: 12px 4px;
-        font-size: 12px; /* スマホ横並び用に調整 */
+        font-size: 12px;
       }
       .radio-row {
         gap: 8px;
@@ -594,10 +609,8 @@
   <header class="app-header">
     <div class="header-bar">
       <a href="https://takatrp.github.io/tool-portal/" class="brand">
-        <!-- 画像パスを「ロゴ.jpg」に変更 -->
-        <img src="./ロゴ.jpg" alt="税理士法人松本会計事務所" class="brand-logo" />
+        <img src="./logo.jpg" alt="税理士法人松本会計事務所" class="brand-logo" />
         <div class="brand-text">
-          <!-- MATSUMOTO KAKEI TOOLS は削除済み -->
           <h1 class="brand-title">贈与税試算ツール</h1>
           <p class="brand-subtitle">暦年課税（一般・特例）／相続時精算課税の概算シミュレーション</p>
         </div>
@@ -639,12 +652,13 @@
         <div class="field">
           <label>贈与の区分</label>
           <div class="radio-row">
+            <!-- ここを変更: checkedをspecialからgeneralへ移動 -->
             <label class="radio-chip">
-              <input type="radio" name="annualMode" value="general" />
+              <input type="radio" name="annualMode" value="general" checked />
               <span>一般贈与財産のみ</span>
             </label>
             <label class="radio-chip">
-              <input type="radio" name="annualMode" value="special" checked />
+              <input type="radio" name="annualMode" value="special" />
               <span>特例贈与財産のみ（直系尊属→18歳以上の子・孫など）</span>
             </label>
             <label class="radio-chip">
@@ -656,12 +670,13 @@
         </div>
 
         <div class="grid grid-2" style="margin-top:10px;" id="annualInputs">
-          <div class="field annual-group annual-general-only hidden" id="annualGeneralOnly">
+          <!-- 初期表示クラスを調整: generalのみ表示、specialはhidden -->
+          <div class="field annual-group annual-general-only" id="annualGeneralOnly">
             <label>一般贈与財産の年間贈与額</label>
             <input type="text" inputmode="numeric" id="annualGeneralAmount" placeholder="例）3,000,000" class="yen-input" />
             <small>兄弟姉妹・配偶者などからの贈与、または18歳未満の子・孫への贈与など。</small>
           </div>
-          <div class="field annual-group annual-special-only" id="annualSpecialOnly">
+          <div class="field annual-group annual-special-only hidden" id="annualSpecialOnly">
             <label>特例贈与財産の年間贈与額</label>
             <input type="text" inputmode="numeric" id="annualSpecialAmount" placeholder="例）4,000,000" class="yen-input" />
             <small>18歳以上の子・孫などが、父母・祖父母から受ける贈与（住宅取得資金等の特例は含みません）。</small>
@@ -722,7 +737,8 @@
       <div class="card-body">
         <p id="resultSummary" class="result-heading">入力内容をもとに、贈与税額を概算しています。</p>
         <div class="result-grid">
-          <div class="metric">
+          <!-- 強調表示クラスを追加 -->
+          <div class="metric metric-featured">
             <div class="metric-label">概算贈与税額</div>
             <div class="metric-value" id="resultTax">- 円</div>
             <div class="metric-sub" id="resultTaxSub">（100円未満切捨て）</div>
@@ -763,7 +779,7 @@
       </div>
     </section>
 
-    <!-- 下部アクションボタン（スマホでも横並び） -->
+    <!-- 下部アクションボタン -->
     <section class="card" id="bottomActions">
       <div class="card-body">
         <div class="action-buttons">
@@ -879,7 +895,7 @@
   // 全ての金額入力欄
   const yenInputs = document.querySelectorAll('.yen-input');
 
-  // リアルタイムカンマ表示ロジック（カーソル制御機能付き）
+  // リアルタイムカンマ表示ロジック
   yenInputs.forEach(input => {
     input.addEventListener('input', function(e) {
       // カーソル位置を取得
@@ -903,7 +919,6 @@
       this.value = formatted;
 
       // カーソル位置を復元
-      // 新しい文字列の中で、元の「数字の個数」と同じ場所を探す
       let newCursor = 0;
       let digitsSeen = 0;
       for (let i = 0; i < formatted.length; i++) {
@@ -915,7 +930,6 @@
           break;
         }
       }
-      // 数字が見つからない（先頭など）場合は適切な位置へ
       if (digitsBeforeCursor === 0) newCursor = 0;
       
       this.setSelectionRange(newCursor, newCursor);
@@ -925,7 +939,6 @@
   // ユーティリティ
   function parseYenInput(el){
     if(!el) return 0;
-    // カンマとスペースを除去して数値化
     const raw = (el.value || '').replace(/[,\s]/g,'');
     if(!raw) return 0;
     const n = Number(raw);
@@ -1245,7 +1258,7 @@
 
   // 暦年課税：入力欄の切替
   function updateAnnualInputs(){
-    const mode = document.querySelector('input[name="annualMode"]:checked')?.value || 'special';
+    const mode = document.querySelector('input[name="annualMode"]:checked')?.value || 'general'; // ここもgeneralに変更
     [annualGeneralOnly, annualSpecialOnly, annualBothGeneral, annualBothSpecial].forEach(el => el.classList.add('hidden'));
     if(mode === 'general'){
       annualGeneralOnly.classList.remove('hidden');
@@ -1459,8 +1472,9 @@
   function handleResetAll(){
     const modeAnnual = document.querySelector('input[name="mode"][value="annual"]');
     if(modeAnnual){ modeAnnual.checked = true; }
-    const annualSpecialRadio = document.querySelector('input[name="annualMode"][value="special"]');
-    if(annualSpecialRadio){ annualSpecialRadio.checked = true; }
+    // リセット時もgeneralをデフォルトに
+    const annualGeneralRadio = document.querySelector('input[name="annualMode"][value="general"]');
+    if(annualGeneralRadio){ annualGeneralRadio.checked = true; }
 
     updateMode();
     updateAnnualInputs();
