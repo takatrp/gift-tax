@@ -35,10 +35,13 @@
     html,body{height:100%;}
     body{
       margin:0;
+      /* ベースのフォントサイズを15pxに拡大 */
+      font-size: 15px;
       font-family:-apple-system,BlinkMacSystemFont,"Hiragino Kaku Gothic ProN","Yu Gothic","Noto Sans JP",Segoe UI,Roboto,Arial,sans-serif;
       background:var(--bg);
       color:var(--ink);
-      -webkit-text-size-adjust: 100%; /* モバイルでの文字サイズ自動調整を防止 */
+      -webkit-text-size-adjust: 100%;
+      line-height: 1.6;
     }
     .app{
       min-height:100vh;
@@ -49,7 +52,7 @@
       background:var(--bg);
       padding:12px 16px 8px;
       border-bottom:1px solid #d4e1e7;
-      position: sticky; /* ヘッダーを固定してアクセスしやすく */
+      position: sticky;
       top: 0;
       z-index: 100;
       backdrop-filter: blur(8px);
@@ -60,20 +63,20 @@
       margin:0 auto;
       display:flex;
       align-items:center;
-      gap:10px;
-      justify-content: space-between; /* ロゴとボタンを離す */
+      gap:12px;
+      justify-content: space-between;
     }
     .brand{
       display:inline-flex;
       align-items:center;
-      gap:10px;
+      gap:12px;
       text-decoration:none;
       color:var(--ink);
       flex:1 1 auto;
-      min-width: 0; /* Flexboxでのはみ出し防止 */
+      min-width: 0;
     }
     .brand-logo{
-      height:40px;
+      height:44px; /* ロゴも少し大きく */
       width:auto;
       display:block;
       border-radius:12px;
@@ -86,10 +89,11 @@
       display:flex;
       flex-direction:column;
       gap:2px;
-      min-width: 0; /* 文字の省略用 */
+      min-width: 0;
     }
+    /* タイトルのMATSUMOTO...はHTML側で削除済み */
     .brand-title{
-      font-size:18px;
+      font-size:20px; /* タイトルサイズアップ */
       margin:0;
       font-weight:700;
       white-space: nowrap;
@@ -98,7 +102,7 @@
     }
     .brand-subtitle{
       margin:0;
-      font-size:11px;
+      font-size:12px; /* サブタイトルサイズアップ */
       color:var(--muted);
       white-space: nowrap;
       overflow: hidden;
@@ -115,8 +119,8 @@
       background:var(--card);
       border-radius:var(--radius-lg);
       box-shadow:var(--shadow);
-      padding:18px 18px 20px;
-      margin-bottom:16px;
+      padding:24px; /* 余白を広げる */
+      margin-bottom:20px;
       border:1px solid rgba(255,255,255,.8);
     }
     .card-header{
@@ -124,43 +128,43 @@
       justify-content:space-between;
       align-items:flex-start;
       gap:8px;
-      margin-bottom:10px;
-      flex-wrap: wrap; /* タイトルが長い場合に折り返し */
+      margin-bottom:16px;
+      flex-wrap: wrap;
     }
     .card-title{
       margin:0;
-      font-size:15px;
+      font-size:18px; /* 見出しサイズアップ */
       font-weight:700;
       display:flex;
       align-items:center;
-      gap:8px;
+      gap:10px;
     }
     .badge{
       display:inline-flex;
       align-items:center;
-      padding:2px 8px;
+      padding:4px 10px;
       border-radius:var(--radius-pill);
       border:1px solid rgba(255,255,255,.8);
-      font-size:10px;
+      font-size:11px; /* バッジサイズアップ */
       background:rgba(0,0,0,.2);
       white-space: nowrap;
     }
     .pill-switch{
       display:inline-flex;
-      padding:2px;
+      padding:4px;
       border-radius:var(--radius-pill);
       background:#edf3f6;
       border:1px solid #d3e1ea;
-      gap:2px;
+      gap:4px;
     }
     .pill-switch label{
       position:relative;
       display:inline-flex;
       align-items:center;
       justify-content:center;
-      padding:5px 10px;
+      padding:8px 16px;
       border-radius:var(--radius-pill);
-      font-size:12px;
+      font-size:14px; /* スイッチ文字サイズアップ */
       cursor:pointer;
       white-space:nowrap;
       color:var(--muted);
@@ -174,15 +178,15 @@
     }
     .pill-switch span{
       border-radius:var(--radius-pill);
-      padding:5px 10px;
+      padding:8px 16px;
     }
     .card-body{
-      font-size:13px;
+      font-size:15px; /* 本文サイズアップ */
       color:var(--muted);
     }
     .grid{
       display:grid;
-      gap:10px 16px;
+      gap:16px 20px;
     }
     @media(min-width:800px){
       .grid-2{
@@ -192,26 +196,26 @@
     .field{
       display:flex;
       flex-direction:column;
-      gap:4px;
+      gap:6px;
     }
     .field label{
-      font-size:12px;
-      font-weight:600;
+      font-size:14px; /* ラベルサイズアップ */
+      font-weight:700; /* より太く */
       color:var(--ink);
     }
     .field small{
-      font-size:11px;
+      font-size:12px; /* 注釈サイズアップ */
       color:var(--muted);
-      line-height: 1.4;
+      line-height: 1.5;
     }
-    /* input[type="text"] に変更してカンマ入力をサポート */
+    /* 入力欄 */
     input[type="number"],
     input[type="text"],
     select{
       border-radius:10px;
       border:1px solid var(--border);
-      padding:10px; /* タップしやすいように少し広げる */
-      font-size:16px; /* iOSでズームしないサイズ */
+      padding:12px;
+      font-size:16px; /* 16pxあれば読みやすい */
       font-family:inherit;
       outline:none;
       width:100%;
@@ -229,18 +233,18 @@
     .radio-row{
       display:flex;
       flex-wrap:wrap;
-      gap:8px;
-      margin-top:4px;
+      gap:10px;
+      margin-top:6px;
     }
     .radio-chip{
       display:inline-flex;
       align-items:center;
-      gap:4px;
-      padding:6px 10px; /* 少し大きめに */
+      gap:6px;
+      padding:8px 12px;
       border-radius:var(--radius-pill);
       border:1px solid var(--border);
       background:#f7fafb;
-      font-size:13px; /* 少し大きく */
+      font-size:13px; /* チップサイズアップ */
       color:var(--muted);
       cursor:pointer;
       transition: all 0.2s ease;
@@ -256,8 +260,8 @@
     .radio-chip span::before{
       content:"";
       display:inline-block;
-      width:10px;
-      height:10px;
+      width:12px;
+      height:12px;
       border-radius:999px;
       border:1px solid var(--border);
       margin-right:4px;
@@ -272,24 +276,24 @@
     .btn-row{
       display:flex;
       flex-wrap:wrap;
-      gap:10px;
-      margin-top:16px;
+      gap:12px;
+      margin-top:20px;
       align-items:center;
     }
     /* 計算ボタン用 */
     .btn-calc{
       border:none;
       border-radius:var(--radius-pill);
-      padding:10px 24px; /* タップ領域拡大 */
-      font-size:14px;
-      font-weight:600;
+      padding:12px 28px;
+      font-size:15px; /* ボタン文字サイズアップ */
+      font-weight:700;
       background:var(--accent);
       color:#fff;
       cursor:pointer;
       display:inline-flex;
       align-items:center;
       justify-content: center;
-      gap:6px;
+      gap:8px;
       box-shadow:0 10px 24px rgba(87,136,153,.45);
       transition:transform .1s ease,box-shadow .1s ease,background .1s ease;
     }
@@ -302,15 +306,15 @@
       transform:translateY(1px);
     }
     .btn-calc-icon{
-      font-size:14px;
+      font-size:16px;
     }
     /* 入力クリアボタン用 */
     .btn-ghost{
       border-radius:var(--radius-pill);
-      padding:8px 16px;
+      padding:10px 20px;
       border:1px dashed var(--border);
       background:transparent;
-      font-size:13px;
+      font-size:14px; /* 文字サイズアップ */
       color:var(--muted);
       cursor:pointer;
       display: flex;
@@ -318,7 +322,7 @@
       align-items: center;
     }
 
-    /* ========== 新しい下部ボタンデザイン ========== */
+    /* ========== 下部ボタン ========== */
     .action-buttons {
       display: flex;
       gap: 12px;
@@ -326,16 +330,15 @@
       flex-wrap: wrap;
       width: 100%;
     }
-    /* コピー・リセットボタン */
     .btn-soft {
       flex: 1;
-      min-width: 100px;
+      min-width: 120px;
       border: 1px solid var(--btn-soft-border);
       background: var(--btn-soft-bg);
       color: var(--btn-soft-text);
       border-radius: 8px;
-      padding: 14px 12px; /* 高さを確保 */
-      font-size: 14px;
+      padding: 14px;
+      font-size: 15px; /* 文字サイズアップ */
       font-weight: 700;
       cursor: pointer;
       text-align: center;
@@ -351,7 +354,6 @@
     .btn-soft:active {
       transform: scale(0.98);
     }
-    /* 印刷ボタン */
     .btn-outline {
       flex: 1;
       min-width: 140px;
@@ -359,8 +361,8 @@
       background: #fff;
       color: var(--btn-outline-border);
       border-radius: 8px;
-      padding: 13px 12px; 
-      font-size: 14px;
+      padding: 13px;
+      font-size: 15px; /* 文字サイズアップ */
       font-weight: 700;
       cursor: pointer;
       text-align: center;
@@ -382,7 +384,7 @@
     }
     .result-grid{
       display:grid;
-      gap:8px 16px;
+      gap:12px 16px;
     }
     @media(min-width:800px){
       .result-grid{
@@ -390,52 +392,52 @@
       }
     }
     .metric{
-      padding:10px 12px;
+      padding:12px 16px;
       border-radius:12px;
       background:var(--accent-soft);
       border:1px solid rgba(87,136,153,.16);
     }
     .metric-label{
-      font-size:11px;
+      font-size:13px; /* ラベルサイズアップ */
       color:var(--muted);
-      margin-bottom:3px;
+      margin-bottom:4px;
     }
     .metric-value{
-      font-size:16px;
+      font-size:20px; /* 値を大きく強調 */
       font-weight:700;
       color:var(--ink);
     }
     .metric-sub{
-      font-size:11px;
+      font-size:12px; /* 文字サイズアップ */
       color:var(--muted);
-      margin-top:1px;
+      margin-top:2px;
     }
     .result-heading{
-      font-size:13px;
+      font-size:16px; /* 見出しサイズアップ */
       font-weight:700;
-      margin:0 0 6px;
+      margin:0 0 8px;
     }
     .note-card ul{
-      margin:6px 0 0 18px;
+      margin:6px 0 0 20px;
       padding:0;
-      font-size:11px;
+      font-size:13px; /* 文字サイズアップ */
       color:var(--muted);
     }
-    .note-card li{margin-bottom:6px;} /* 行間を少し広げる */
+    .note-card li{margin-bottom:6px;}
     .note-highlight{
       border-radius:10px;
-      padding:10px;
+      padding:12px;
       background:#fffbe8;
       border:1px solid #f5e2a0;
-      font-size:12px;
+      font-size:13px; /* 文字サイズアップ */
       color:#6a4c0a;
-      margin-top:10px;
-      line-height: 1.5;
+      margin-top:12px;
+      line-height: 1.6;
     }
     .app-footer{
-      padding:16px;
+      padding:20px;
       text-align:center;
-      font-size:10px;
+      font-size:12px; /* フッターも少し大きく */
       color:var(--muted);
     }
     .hidden{display:none!important;}
@@ -446,11 +448,11 @@
       border:1px solid var(--border);
       background:#ffffff;
       border-radius:12px;
-      padding:8px 12px;
+      padding:8px 14px;
       font-weight:700;
       cursor:pointer;
       color:var(--accent);
-      font-size:11px;
+      font-size:13px; /* 文字サイズアップ */
       box-shadow:0 4px 10px rgba(15,23,42,.06);
       white-space:nowrap;
       transition:background .12s ease,box-shadow .12s ease,transform .12s ease,border-color .12s ease;
@@ -465,14 +467,14 @@
 
     /* --- フッター（ミニ版） --- */
     footer.mk-mini{
-      margin:14px 0 12px;
-      font-size:11px;
+      margin:16px 0 16px;
+      font-size:12px; /* 11px -> 12px */
       color:#334155;
       display:flex;
       justify-content:center;
-      gap:8px;
+      gap:10px;
       flex-wrap:wrap;
-      line-height: 1.5;
+      line-height: 1.6;
     }
     footer.mk-mini a{
       color:inherit;
@@ -480,7 +482,7 @@
       text-underline-offset:2px;
     }
 
-    /* ===== チュートリアル（オーバーレイ/ハイライト/パネル） ===== */
+    /* ===== チュートリアル関連（省略せず維持） ===== */
     .mk-tour-mask{
       position:fixed;inset:0;background:rgba(15,23,42,.56);
       backdrop-filter:saturate(120%) blur(2px);
@@ -495,14 +497,14 @@
     .mk-tour-panel{
       position:fixed;z-index:10002;
       max-width:min(560px, 92vw);background:#fff;border:1px solid var(--border);border-radius:16px;
-      box-shadow:0 14px 36px rgba(0,0,0,.22);padding:12px;
+      box-shadow:0 14px 36px rgba(0,0,0,.22);padding:16px;
     }
-    .mk-tour-head{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+    .mk-tour-head{display:flex;align-items:center;gap:8px;margin-bottom:8px}
     .mk-tour-step{font-size:12px;color:#475569}
-    .mk-tour-title{font-weight:800}
-    .mk-tour-body{font-size:14px;color:var(--ink)}
-    .mk-tour-actions{display:flex;justify-content:flex-end;gap:6px;margin-top:10px}
-    .mk-tour-actions .tbtn{border-radius:10px;border:1px solid var(--border);background:#fff;padding:6px 10px;font-weight:700;cursor:pointer;font-size:12px}
+    .mk-tour-title{font-weight:800;font-size:15px}
+    .mk-tour-body{font-size:14px;color:var(--ink);line-height:1.5}
+    .mk-tour-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:12px}
+    .mk-tour-actions .tbtn{border-radius:10px;border:1px solid var(--border);background:#fff;padding:8px 14px;font-weight:700;cursor:pointer;font-size:13px}
     .mk-tour-actions .tbtn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
     .mk-tour-actions .tbtn:disabled{opacity:.55;cursor:not-allowed}
     .mk-tour-elevate{
@@ -519,72 +521,70 @@
        ========================================= */
     @media (max-width: 600px) {
       .layout {
-        padding: 12px; /* 画面端の余白を少し詰める */
+        padding: 12px;
       }
       .app-header {
         padding: 10px 12px;
       }
       .brand-logo {
-        height: 32px; /* ロゴを少し小さくして圧迫感を減らす */
+        height: 36px; /* 少し調整 */
       }
       .brand-title {
-        font-size: 15px; /* タイトル文字サイズ調整 */
+        font-size: 16px; /* スマホでも少し大きめに */
       }
       .brand-subtitle {
-        display: none; /* スマホではサブタイトルを非表示にしてスッキリさせる */
+        display: none;
       }
       .card {
-        padding: 16px; /* カード内の余白調整 */
+        padding: 16px;
         margin-bottom: 12px;
       }
-      /* スイッチを横幅いっぱいに広げて押しやすく */
       .pill-switch {
         width: 100%;
         display: flex;
       }
       .pill-switch label {
         flex: 1;
-        padding: 8px 4px; /* 高さを確保 */
+        padding: 10px 4px;
+        font-size: 14px;
       }
-      /* 入力欄の調整 */
       input[type="text"], input[type="number"], select {
-        font-size: 16px; /* iOSズーム防止 */
+        font-size: 16px;
         padding: 12px;
       }
-      /* 計算ボタンエリアを縦積みに */
       .btn-row {
         flex-direction: column;
-        align-items: stretch; /* 横幅いっぱいに */
+        align-items: stretch;
         gap: 12px;
       }
       .btn-calc {
         width: 100%;
         justify-content: center;
-        padding: 12px;
+        padding: 14px;
       }
       .btn-ghost {
         width: 100%;
+        padding: 12px;
       }
-      /* 下部アクションボタンの設定変更：横並びを維持 */
+      /* 下部アクションボタン: 横並び維持 */
       .action-buttons {
-        flex-direction: row; /* 縦積み(column)から横並び(row)へ変更 */
-        flex-wrap: nowrap; /* 折り返さない */
+        flex-direction: row;
+        flex-wrap: nowrap;
         gap: 8px;
       }
       .btn-soft, .btn-outline {
-        width: auto; /* 幅固定を解除 */
-        flex: 1; /* 均等に広げる */
-        min-width: 0; /* 縮小可能に */
-        padding: 12px 4px; /* 余白を少し詰めて収める */
-        font-size: 11px; /* 文字サイズを少し小さく */
+        width: auto;
+        flex: 1;
+        min-width: 0;
+        padding: 12px 4px;
+        font-size: 12px; /* スマホ横並び用に調整 */
       }
-      
-      /* ラジオボタンのチップも押しやすく */
       .radio-row {
         gap: 8px;
       }
       .radio-chip {
-        padding: 8px 12px;
+        padding: 10px 14px;
+        font-size: 13px;
       }
     }
   </style>
@@ -594,10 +594,10 @@
   <header class="app-header">
     <div class="header-bar">
       <a href="https://takatrp.github.io/tool-portal/" class="brand">
-        <!-- ロゴ画像のファイル名を変更 -->
-        <img src="./logo.jpg" alt="税理士法人松本会計事務所" class="brand-logo" />
+        <!-- 画像パスを「ロゴ.jpg」に変更 -->
+        <img src="./ロゴ.jpg" alt="税理士法人松本会計事務所" class="brand-logo" />
         <div class="brand-text">
-          <!-- MATSUMOTO KAKEI TOOLS は削除されました -->
+          <!-- MATSUMOTO KAKEI TOOLS は削除済み -->
           <h1 class="brand-title">贈与税試算ツール</h1>
           <p class="brand-subtitle">暦年課税（一般・特例）／相続時精算課税の概算シミュレーション</p>
         </div>
@@ -656,7 +656,6 @@
         </div>
 
         <div class="grid grid-2" style="margin-top:10px;" id="annualInputs">
-          <!-- 入力欄を type="text" inputmode="numeric" に変更し、リアルタイムカンマ表示に対応 -->
           <div class="field annual-group annual-general-only hidden" id="annualGeneralOnly">
             <label>一般贈与財産の年間贈与額</label>
             <input type="text" inputmode="numeric" id="annualGeneralAmount" placeholder="例）3,000,000" class="yen-input" />
@@ -764,7 +763,7 @@
       </div>
     </section>
 
-    <!-- 下部アクションボタン（デザイン変更済み） -->
+    <!-- 下部アクションボタン（スマホでも横並び） -->
     <section class="card" id="bottomActions">
       <div class="card-body">
         <div class="action-buttons">
