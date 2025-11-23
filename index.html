@@ -609,6 +609,7 @@
   <header class="app-header">
     <div class="header-bar">
       <a href="https://takatrp.github.io/tool-portal/" class="brand">
+        <!-- 画像パスを「logo.jpg」に変更（推奨） -->
         <img src="./logo.jpg" alt="税理士法人松本会計事務所" class="brand-logo" />
         <div class="brand-text">
           <h1 class="brand-title">贈与税試算ツール</h1>
@@ -1258,7 +1259,7 @@
 
   // 暦年課税：入力欄の切替
   function updateAnnualInputs(){
-    const mode = document.querySelector('input[name="annualMode"]:checked')?.value || 'general'; // ここもgeneralに変更
+    const mode = document.querySelector('input[name="annualMode"]:checked')?.value || 'special';
     [annualGeneralOnly, annualSpecialOnly, annualBothGeneral, annualBothSpecial].forEach(el => el.classList.add('hidden'));
     if(mode === 'general'){
       annualGeneralOnly.classList.remove('hidden');
@@ -1472,9 +1473,8 @@
   function handleResetAll(){
     const modeAnnual = document.querySelector('input[name="mode"][value="annual"]');
     if(modeAnnual){ modeAnnual.checked = true; }
-    // リセット時もgeneralをデフォルトに
-    const annualGeneralRadio = document.querySelector('input[name="annualMode"][value="general"]');
-    if(annualGeneralRadio){ annualGeneralRadio.checked = true; }
+    const annualSpecialRadio = document.querySelector('input[name="annualMode"][value="special"]');
+    if(annualSpecialRadio){ annualSpecialRadio.checked = true; }
 
     updateMode();
     updateAnnualInputs();
