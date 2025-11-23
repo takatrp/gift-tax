@@ -260,7 +260,7 @@
     .radio-chip:active { transform: scale(0.98); }
     .radio-chip input{display:none;}
     
-    /* 選択時のスタイル：太文字・緑色・丸囲み風ボーダーor背景 */
+    /* 選択時のスタイル */
     .radio-chip input:checked + span{
       color:var(--accent);
     }
@@ -281,7 +281,6 @@
       border-color:var(--accent);
       background:radial-gradient(circle at center, var(--accent) 0 40%, #fff 45% 100%);
     }
-    /* 非選択時のホバー */
     .radio-chip:hover span::before {
       border-color: var(--accent-dark);
     }
@@ -550,22 +549,40 @@
       text-underline-offset:2px;
     }
 
-    /* ===== チュートリアル関連 ===== */
-    .mk-tour-mask{
-      position:fixed;inset:0;background:rgba(15,23,42,.56);
-      backdrop-filter:saturate(120%) blur(2px);
-      z-index:9998;
+    /* ===== チュートリアル関連（スポットライト方式・視認性改善） ===== */
+    /* マスク（クリック用レイヤー） */
+    .mk-tour-mask {
+      position: fixed;
+      inset: 0;
+      background: transparent; /* 背景色なし */
+      z-index: 9998;
     }
-    .mk-tour-focus{
-      position:fixed;border-radius:12px;
-      box-shadow:0 0 0 3px #fff, 0 0 0 6px rgba(87,136,153,.35), 0 10px 30px rgba(0,0,0,.35);
-      z-index:10001;
-      pointer-events:none;transition:transform .2s ease, width .2s ease, height .2s ease, left .2s ease, top .2s ease;
+    
+    /* フォーカスリング（ここ自体に巨大な影をつけて周りを暗くする） */
+    /* 修正：影の色を薄くして可読性向上 */
+    .mk-tour-focus {
+      position: fixed;
+      border-radius: 12px;
+      /* 影で周囲を暗くする：透明度を0.65->0.5に緩和 */
+      box-shadow: 
+        0 0 0 9999px rgba(15, 23, 42, 0.5), 
+        0 0 0 4px #fff, 
+        0 0 0 8px rgba(87, 136, 153, 0.6);
+      z-index: 10001;
+      pointer-events: none;
+      transition: transform .25s cubic-bezier(0.25, 1, 0.5, 1), width .25s ease, height .25s ease, left .25s ease, top .25s ease;
     }
-    .mk-tour-panel{
-      position:fixed;z-index:10002;
-      max-width:min(560px, 92vw);background:#fff;border:1px solid var(--border);border-radius:16px;
-      box-shadow:0 14px 36px rgba(0,0,0,.22);padding:16px;
+
+    .mk-tour-panel {
+      position: fixed;
+      z-index: 10002;
+      max-width: min(560px, 92vw);
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      box-shadow: 0 14px 36px rgba(0,0,0,.25);
+      padding: 16px;
+      transition: left .25s ease, top .25s ease;
     }
     .mk-tour-head{display:flex;align-items:center;gap:8px;margin-bottom:8px}
     .mk-tour-step{font-size:12px;color:#475569}
@@ -575,18 +592,16 @@
     .mk-tour-actions .tbtn{border-radius:10px;border:1px solid var(--border);background:#fff;padding:8px 14px;font-weight:700;cursor:pointer;font-size:13px}
     .mk-tour-actions .tbtn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
     .mk-tour-actions .tbtn:disabled{opacity:.55;cursor:not-allowed}
-    .mk-tour-elevate{
-      position:relative !important;
-      z-index:10000 !important;
-      isolation:isolate;
+    
+    .mk-tour-elevate {
+      position: relative;
     }
+
     @media(max-width:600px){
       .mk-tour-panel{left:12px;right:12px;max-width:calc(100vw - 24px);}
     }
 
-    /* =========================================
-       印刷用スタイル (Print Styles) - 追加
-       ========================================= */
+    /* 印刷設定 */
     @media print {
       body {
         background: #fff;
@@ -594,130 +609,18 @@
         -webkit-print-color-adjust: exact;
         print-color-adjust: exact;
       }
-      .app-header,
-      .btn-tutorial,
-      .btn-row,
-      .btn-ghost,
-      .action-buttons,
-      footer.mk-mini,
-      .mk-tour-mask,
-      .mk-tour-focus,
-      .mk-tour-panel {
+      .app-header, .btn-tutorial, .btn-row, .btn-ghost, .action-buttons, footer.mk-mini,
+      .mk-tour-mask, .mk-tour-focus, .mk-tour-panel {
         display: none !important;
       }
-      .layout {
-        padding: 0;
-        max-width: 100%;
-      }
-      .card {
-        box-shadow: none;
-        border: 1px solid #ccc;
-        margin-bottom: 20px;
-        page-break-inside: avoid;
-      }
-      /* 詳細エリアは強制表示、スクロールなし */
-      #detailsArea {
-        display: block !important;
-        overflow: visible !important;
-      }
-      .detail-table th {
-        position: static !important; /* sticky解除 */
-      }
-      /* 入力欄の枠を薄く */
-      input, select {
-        border: none;
-        background: transparent;
-        padding: 0;
-        text-align: right;
-        width: auto;
-        display: inline-block;
-      }
-      .pill-switch {
-        border: none;
-        background: none;
-      }
-      .pill-switch input:checked + span {
-        box-shadow: none;
-        font-weight: bold;
-        border: 1px solid #000;
-      }
-      .radio-chip {
-        border: 1px solid #ccc;
-      }
-      .radio-chip input:checked + span::before {
-        background: #000;
-      }
-    }
-
-    /* =========================================
-       スマホ表示最適化 (Mobile Optimization)
-       ========================================= */
-    @media (max-width: 600px) {
-      .layout {
-        padding: 12px;
-      }
-      .app-header {
-        padding: 10px 12px;
-      }
-      .brand-logo {
-        height: 36px;
-      }
-      .brand-title {
-        font-size: 18px;
-      }
-      .brand-subtitle {
-        display: none;
-      }
-      .card {
-        padding: 16px;
-        margin-bottom: 12px;
-      }
-      .pill-switch {
-        width: 100%;
-        display: flex;
-      }
-      .pill-switch label {
-        flex: 1;
-        padding: 10px 4px;
-        font-size: 14px;
-      }
-      input[type="text"], input[type="number"], select {
-        font-size: 16px;
-        padding: 12px;
-      }
-      .btn-row {
-        flex-direction: column;
-        align-items: stretch;
-        gap: 12px;
-      }
-      .btn-calc {
-        width: 100%;
-        justify-content: center;
-        padding: 14px;
-      }
-      .btn-ghost {
-        width: 100%;
-        padding: 12px;
-      }
-      .action-buttons {
-        flex-direction: row;
-        flex-wrap: nowrap;
-        gap: 8px;
-      }
-      .btn-soft, .btn-outline {
-        width: auto;
-        flex: 1;
-        min-width: 0;
-        padding: 12px 4px;
-        font-size: 12px;
-      }
-      .radio-row {
-        gap: 8px;
-      }
-      .radio-chip {
-        padding: 10px 14px;
-        font-size: 13px;
-      }
+      .layout { padding: 0; max-width: 100%; }
+      .card { box-shadow: none; border: 1px solid #ccc; margin-bottom: 20px; page-break-inside: avoid; }
+      #detailsArea { display: block !important; overflow: visible !important; }
+      .detail-table th { position: static !important; }
+      input, select { border: none; background: transparent; padding: 0; text-align: right; width: auto; }
+      .pill-switch, .radio-row { border: none; background: none; }
+      .radio-chip { border: 1px solid #ccc; }
+      .radio-chip input:checked + span::before { background: #000; }
     }
   </style>
 </head>
@@ -933,11 +836,7 @@
               <input type="number" id="multiReturnRate" class="align-left" placeholder="例）1.0" step="0.1" />
               <small>相続財産全体の平均的な増減率。</small>
             </div>
-            <div class="field">
-              <label>想定相続税実効税率（％）<span id="effRateAuto" style="font-size:11px; color:var(--accent); margin-left:4px; font-weight:normal;">※自動推計</span></label>
-              <input type="number" id="multiEffRate" class="align-left" placeholder="例）20" step="0.1" />
-              <small>財産額と法定相続人数(＝受贈者数)から自動推計します（手動変更可）。</small>
-            </div>
+            <!-- 修正: 実効税率の入力欄を削除（ロジック内で自動計算） -->
           </div>
         </div>
       </section>
@@ -1127,7 +1026,7 @@
     <a href="https://www.matsumoto-kaikei.or.jp/" target="_blank" rel="noopener license">税理士法人松本会計事務所</a> ｜ 
     <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank" rel="license noopener">CC BY-NC-SA 4.0</a> ｜ 
     <a href="/tool-portal/terms.html" target="_blank" rel="noopener">利用条件</a> ｜ 
-    <span id="build-rev">v1.2 Final</span>（<span id="last-updated-date"></span>）
+    <span id="build-rev">v1.4 Final</span>（<span id="last-updated-date"></span>）
   </footer>
 </div>
 
@@ -1135,7 +1034,7 @@
 (function(){
   'use strict';
 
-  const VERSION = 'v1.2 Final';
+  const VERSION = 'v1.4 Final';
 
   // 年号 & 最終更新日を自動反映
   (function syncFooterMeta(){
@@ -1242,7 +1141,7 @@
   const multiEstateTotal = document.getElementById('multiEstateTotal');
   const multiYears = document.getElementById('multiYears');
   const multiReturnRate = document.getElementById('multiReturnRate');
-  const multiEffRate = document.getElementById('multiEffRate');
+  // multiEffRate (想定相続税実効税率) のDOM取得は削除
   const multiRecipients = document.getElementById('multiRecipients'); 
 
   const multiAnnualGiftPerPerson = document.getElementById('multiAnnualGiftPerPerson');
@@ -1314,43 +1213,6 @@
     });
   });
 
-  // 自動計算：相続税実効税率
-  function updateEffectiveRate(){
-    const estateStr = multiEstateTotal.value.replace(/[^0-9]/g,'');
-    const heirsStr = multiRecipients.value;
-    if(!estateStr || !heirsStr) return;
-
-    const estate = Number(estateStr);
-    const heirs = Math.floor(Number(heirsStr));
-    if(estate <= 0 || heirs <= 0) return;
-
-    // 基礎控除額
-    const deduction = 30000000 + 6000000 * heirs;
-    const taxableEstate = Math.max(0, estate - deduction);
-
-    if(taxableEstate <= 0){
-      multiEffRate.value = "0.0";
-      return;
-    }
-
-    // 法定相続分に応じた取得金額（法定相続人は全員子と仮定して均等割）
-    const share = Math.floor(taxableEstate / heirs);
-    
-    // 1人あたりの税額計算
-    const bracket = INHERITANCE_TAX_BRACKETS.find(b => share <= b.upTo) || INHERITANCE_TAX_BRACKETS[INHERITANCE_TAX_BRACKETS.length-1];
-    const taxPerHeir = share * bracket.rate - bracket.deduction;
-    const totalTax = taxPerHeir * heirs;
-
-    // 実効税率（％）
-    const effRate = (totalTax / estate) * 100;
-    multiEffRate.value = effRate.toFixed(1);
-  }
-
-  // イベントリスナー：実効税率自動計算
-  if(multiEstateTotal) multiEstateTotal.addEventListener('blur', updateEffectiveRate);
-  if(multiRecipients) multiRecipients.addEventListener('blur', updateEffectiveRate);
-
-
   // ユーティリティ
   function parseYenInput(el){
     if(!el) return 0;
@@ -1391,7 +1253,7 @@
     return Number.isFinite(n) ? n : defaultValue;
   }
 
-  // 新しい相続税計算関数
+  // 新しい相続税計算関数（法定相続分按分方式）
   function calcInheritanceTaxAmount(estateTotal, heirsCount) {
     if (estateTotal <= 0 || heirsCount <= 0) return 0;
     const deduction = 30000000 + 6000000 * heirsCount;
@@ -1410,6 +1272,7 @@
 
   // ===== チュートリアル =====
   const TOUR_KEY = 'gift_tax_tour_dismissed_v1';
+  // STEP5, STEP6（結果表示）は削除
   const steps = [
     {
       sel: '.brand',
@@ -1429,17 +1292,7 @@
     {
       sel: '#multiCommonCard',
       title: '長期シミュレーション：前提条件',
-      body: '長期シミュレーションタブでは、相続財産総額や相続までの年数、受贈者の人数などを入力してシミュレーションを行います。財産額と人数を入力すると、相続税の実効税率目安が自動計算されます。'
-    },
-    {
-      sel: '#resultCard',
-      title: '単年試算：結果表示',
-      body: '単年試算では、概算贈与税額・課税価格・適用税率や相続時精算課税の特別控除利用状況などが表示されます。'
-    },
-    {
-      sel: '#multiResultCard',
-      title: '長期シミュレーション：結果表示',
-      body: '長期シミュレーション結果では、税負担・残財産・有利判定に加え、毎年の資産推移や詳細データを確認できます。'
+      body: '長期シミュレーションタブでは、相続財産総額や相続までの年数、受贈者の人数などを入力してシミュレーションを行います。'
     }
   ];
 
@@ -1585,6 +1438,7 @@
         placeFocus();
       }
     });
+    // 修正: エンターキーでも進む
     nextBtn.addEventListener('click', async () => {
       if(tourIndex < steps.length - 1){
         tourIndex++;
@@ -1599,7 +1453,7 @@
       if(!panelEl || panelEl.style.display === 'none') return;
       if(e.key === 'Escape'){
         endTour();
-      }else if(e.key === 'ArrowRight'){
+      }else if(e.key === 'ArrowRight' || e.key === 'Enter'){ // Enterキー追加
         nextBtn.click();
       }else if(e.key === 'ArrowLeft'){
         prevBtn.click();
@@ -1886,7 +1740,7 @@
     if(multiEstateTotal) multiEstateTotal.value = '';
     if(multiYears) multiYears.value = '';
     if(multiReturnRate) multiReturnRate.value = '';
-    if(multiEffRate) multiEffRate.value = '';
+    // multiEffRate削除済み
     if(multiAnnualGiftPerPerson) multiAnnualGiftPerPerson.value = '';
     if(multiRecipients) multiRecipients.value = ''; 
     if(multiSeisanInitialGift) multiSeisanInitialGift.value = '';
@@ -1912,6 +1766,9 @@
 
     let r = parseNumber(multiReturnRate, 0) / 100;
     if(!Number.isFinite(r) || r < -1) r = 0;
+
+    // 実効税率入力欄削除のため、ここで取得しない
+    // const effRate = ...
 
     const giftPerPersonA = parseYenInput(multiAnnualGiftPerPerson);
     
@@ -1978,12 +1835,13 @@
     }
 
     const estateBaseA = estateA + addbackA;
+    // 修正: 入力値を使わず、速算表から相続税額を計算する
     const estateTaxA = calcInheritanceTaxAmount(estateBaseA, recipients);
     const totalTaxA = totalGiftTaxA + estateTaxA;
     const finalNetA = Math.max(0, estateA - estateTaxA);
 
-    // 実効税率(A)参考
-    const effectiveRateA = (estateTaxA / estateBaseA) * 100;
+    // 実効税率(A)参考 (計算結果表示用)
+    const effectiveRateA = (estateBaseA > 0) ? (estateTaxA / estateBaseA) * 100 : 0;
 
     // ---- 相続時精算課税シナリオ (B) ----
     let estateB = estate0;
@@ -2066,6 +1924,7 @@
     }
 
     const estateBaseB = estateB + addbackB;
+    // 修正: 入力値を使わず、速算表から相続税額を計算する
     const estateTaxB_Total = calcInheritanceTaxAmount(estateBaseB, recipients);
 
     // 精算課税分の贈与税控除
@@ -2083,7 +1942,7 @@
     const finalNetB = Math.max(0, estateB - netEstateTaxB);
     
     // 実効税率(B)参考
-    const effectiveRateB = (estateTaxB_Total / estateBaseB) * 100;
+    const effectiveRateB = (estateBaseB > 0) ? (estateTaxB_Total / estateBaseB) * 100 : 0;
 
     // 詳細テーブル構築
     let rowsHtml = '';
