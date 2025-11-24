@@ -3,7 +3,8 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>贈与税試算レポート - 税理士法人松本会計事務所</title>
+  <!-- タブに表示される名前を変更 -->
+  <title>贈与税試算ツール</title>
 
   <!-- ファビコン設定 -->
   <link rel="icon" type="image/png" sizes="192x192" href="./favicon192192.png" />
@@ -24,6 +25,8 @@
       --accent-soft:rgba(87,136,153,.08);
       --border:#d4e1e7;
       --danger:#b42318;
+      /* 数値強調用の緑色 */
+      --success-text: #009e7f; 
       --shadow:0 18px 40px rgba(20,50,70,.12);
       --radius-lg:18px;
       --radius-pill:999px;
@@ -232,6 +235,12 @@
     .metric-value{ font-size:22px; font-weight:700; color:var(--ink); }
     .metric-sub{ font-size:11px; color:var(--muted); margin-top:4px; }
 
+    /* 【修正】概算贈与税額などの重要数値を緑色にするクラス */
+    #resultTax, #multiAnnualTotalTax, #multiSeisanTotalTax {
+      color: var(--success-text);
+      font-weight: 800;
+    }
+
     /* グラフ・表 */
     .chart-container{ position:relative; height:300px; width:100%; margin-top:20px; }
     .detail-table{
@@ -269,8 +278,15 @@
       margin-top:12px;
       line-height: 1.6;
     }
-    .app-footer{ text-align:center; font-size:12px; color:var(--muted); padding:20px; }
-    .app-footer a{ color:inherit; }
+
+    /* 【修正】フッターを中央寄せにする */
+    footer.mk-mini {
+      text-align: center;
+      font-size: 12px;
+      color: var(--muted);
+      padding: 20px;
+    }
+    footer.mk-mini a{ color:inherit; }
 
     /* チュートリアルポップアップ */
     .mk-tour-mask { position: fixed; inset: 0; background: transparent; z-index: 9998; }
@@ -289,29 +305,21 @@
        印刷設定 (Print CSS) - 全ページ固定ヘッダー/フッター版
        ========================================= */
     @media print {
-      /* 【レイアウト戦略】
-         position: fixed は通常、ブラウザの「ビューポート」に対して配置されますが、
-         印刷時のコンテキストでは「各ページの指定座標」に配置され、全ページで繰り返される特性があります。
-         本文と重ならないように、@page で上下に十分なマージンを取り、
-         fixed要素をそのマージン領域（top: 0 より上、またはページ上端）に配置します。
-      */
       @page {
         size: A4;
-        /* ヘッダー・フッター用のスペースを確保するためマージンを大きめに設定 */
         margin-top: 25mm;
         margin-bottom: 20mm;
         margin-left: 15mm;
         margin-right: 15mm;
       }
 
-      /* 画面全体の構造 */
       body {
         background: #fff !important;
         color: #000 !important;
         font-size: 10.5pt;
         -webkit-print-color-adjust: exact;
         print-color-adjust: exact;
-        padding-top: 0; /* fixedヘッダーのためにbody自体のpaddingは不要（@pageで制御） */
+        padding-top: 0;
       }
 
       .app {
@@ -320,22 +328,18 @@
         overflow: visible !important;
       }
 
-      /* 画面用のUI要素を完全に非表示 */
       .app-header, .btn-row, .btn-tutorial, .btn-ghost, 
-      .action-buttons, .pill-switch, .app-footer,
+      .action-buttons, .pill-switch, 
       #startTour, #toggleDetailsBtn, #loadSampleBtn, 
       .mk-tour-mask, .mk-tour-focus, .mk-tour-panel,
       footer.mk-mini {
         display: none !important;
       }
 
-      /* --- 固定ヘッダー --- */
+      /* 固定ヘッダー */
       .print-header-fixed {
         display: flex !important;
         position: fixed;
-        /* @pageのマージン領域に食い込ませる設定。
-           top: 0 は「本文領域」の開始位置になるブラウザが多いため、
-           マイナスの値を指定してマージンエリア（紙の上端寄り）に配置します。 */
         top: -15mm; 
         left: 0;
         width: 100%;
@@ -345,15 +349,14 @@
         border-bottom: 2px solid var(--accent);
         padding-bottom: 5px;
         margin-bottom: 0;
-        background-color: #fff; /* 透過防止 */
+        background-color: #fff;
         z-index: 9999;
       }
 
-      /* --- 固定フッター --- */
+      /* 固定フッター */
       .print-footer-fixed {
         display: flex !important;
         position: fixed;
-        /* 本文領域の終了位置より下（マージンエリア）に配置 */
         bottom: -10mm;
         left: 0;
         width: 100%;
@@ -368,14 +371,11 @@
         z-index: 9999;
       }
 
-      /* ヘッダー・フッター内パーツ */
       .print-logo-section { display: flex; align-items: center; gap: 15px; }
       .print-logo { height: 35px; width: auto; }
       .print-company-name { font-size: 14pt; font-weight: 700; color: var(--ink); }
       .print-report-title { font-size: 10pt; color: var(--muted); }
 
-      /* --- コンテンツ整形 --- */
-      
       .layout {
         display: block !important;
         width: 100%;
@@ -383,14 +383,13 @@
         padding: 0;
       }
 
-      /* カードをレポートのセクションのように見せる */
       .card {
         box-shadow: none;
         border: none;
         border-bottom: 1px solid #eee;
         padding: 5px 0;
         margin-bottom: 15px;
-        break-inside: avoid; /* カード途中での改ページ回避 */
+        break-inside: avoid;
         page-break-inside: avoid;
         background: transparent;
       }
@@ -405,7 +404,6 @@
         padding-left: 10px;
       }
       
-      /* 入力フォームのテキスト化 */
       .field {
         flex-direction: row;
         align-items: center;
@@ -419,7 +417,7 @@
         font-weight: normal;
         font-size: 10pt;
       }
-      .field small { display: none !important; } /* 注釈は消す */
+      .field small { display: none !important; }
       
       input[type="number"], input[type="text"], select {
         border: none;
@@ -436,7 +434,6 @@
       input::placeholder { color: transparent; }
       .badge { display: none !important; }
 
-      /* 選択肢（ラジオボタン） */
       .radio-row {
         gap: 15px;
         justify-content: flex-end;
@@ -445,7 +442,7 @@
         padding: 0;
         border: none;
       }
-      .radio-chip input:not(:checked) + span { display: none; } /* 選ばれてないものは非表示 */
+      .radio-chip input:not(:checked) + span { display: none; }
       .radio-chip input:checked + span {
         color: #000;
         font-weight: bold;
@@ -453,7 +450,6 @@
       }
       .radio-chip span::before { display: none; }
 
-      /* 結果エリア */
       .result-card {
         background: #fdfdfd !important;
         border: 2px solid var(--accent) !important;
@@ -474,7 +470,13 @@
         padding: 15px;
       }
 
-      /* グラフ */
+      /* 【修正】印刷時も緑色を強制する */
+      #resultTax, #multiAnnualTotalTax, #multiSeisanTotalTax {
+        color: var(--success-text) !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+
       .chart-container {
         height: 250px !important;
         width: 80% !important;
@@ -483,7 +485,6 @@
       }
       canvas { width: 100% !important; height: 100% !important; }
 
-      /* テーブル */
       #detailsArea {
         display: block !important;
         break-before: page;
@@ -499,25 +500,28 @@
         color: #000;
       }
 
-      /* 注意書き（表示するがシンプルに） */
+      /* 【修正】最終ページのご利用上の注意をカラー印刷する */
       .note-card {
         display: block !important;
         border: 1px solid #eee;
-        padding: 10px;
-        background: #f9f9f9;
+        background: #f9f9f9 !important;
         page-break-inside: avoid;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
       }
       .note-card .card-title { font-size: 10pt; border: none; padding: 0; }
+      
       .note-highlight {
-        border: none;
-        background: transparent;
-        padding: 5px 0;
+        border: 1px solid #f5e2a0 !important;
+        background-color: #fffbe8 !important;
+        color: #6a4c0a !important;
+        padding: 5px 10px;
         font-size: 9pt;
-        color: #000;
         font-weight: bold;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
       }
 
-      /* レイアウト調整 */
       .grid, .grid-2, .grid-3 { display: block !important; }
       .grid > div, .grid-2 > div { margin-bottom: 5px; page-break-inside: avoid; }
       .print-break-before {
