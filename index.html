@@ -3,10 +3,9 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <!-- タブに表示される名前を変更 -->
   <title>贈与税試算ツール</title>
 
-  <!-- ファビコン設定 -->
+  <!-- ファビコン設定 (必要に応じて画像を用意してください) -->
   <link rel="icon" type="image/png" sizes="192x192" href="./favicon192192.png" />
   <link rel="apple-touch-icon" href="./favicon192192.png" />
   <meta name="theme-color" content="#578899" />
@@ -235,8 +234,8 @@
     .metric-value{ font-size:22px; font-weight:700; color:var(--ink); }
     .metric-sub{ font-size:11px; color:var(--muted); margin-top:4px; }
 
-    /* 【修正】概算贈与税額などの重要数値を緑色にするクラス */
-    #resultTax, #multiAnnualTotalTax, #multiSeisanTotalTax {
+    /* 【修正】概算贈与税額、差額等の重要数値を緑色にするクラス */
+    #resultTax, #multiAnnualTotalTax, #multiSeisanTotalTax, #multiTaxDiff {
       color: var(--success-text);
       font-weight: 800;
     }
@@ -279,7 +278,6 @@
       line-height: 1.6;
     }
 
-    /* 【修正】フッターを中央寄せにする */
     footer.mk-mini {
       text-align: center;
       font-size: 12px;
@@ -319,13 +317,13 @@
         font-size: 10.5pt;
         -webkit-print-color-adjust: exact;
         print-color-adjust: exact;
-        padding-top: 0;
       }
 
       .app {
         display: block !important;
         height: auto !important;
         overflow: visible !important;
+        padding-top: 0;
       }
 
       .app-header, .btn-row, .btn-tutorial, .btn-ghost, 
@@ -348,8 +346,7 @@
         align-items: flex-end;
         border-bottom: 2px solid var(--accent);
         padding-bottom: 5px;
-        margin-bottom: 0;
-        background-color: #fff; /* 背景色を追加して重なり防止 */
+        background-color: #fff;
         z-index: 9999;
       }
 
@@ -372,7 +369,8 @@
       }
 
       .print-logo-section { display: flex; align-items: center; gap: 15px; }
-      .print-logo { height: 35px; width: auto; }
+      /* 画像がない場合のフォールバック */
+      .print-logo { height: 35px; width: auto; object-fit: contain; }
       .print-company-name { font-size: 14pt; font-weight: 700; color: var(--ink); }
       .print-report-title { font-size: 10pt; color: var(--muted); }
 
@@ -471,7 +469,7 @@
       }
 
       /* 【修正】印刷時も緑色を強制する */
-      #resultTax, #multiAnnualTotalTax, #multiSeisanTotalTax {
+      #resultTax, #multiAnnualTotalTax, #multiSeisanTotalTax, #multiTaxDiff {
         color: var(--success-text) !important;
         -webkit-print-color-adjust: exact;
         print-color-adjust: exact;
@@ -499,6 +497,8 @@
         border: 1px solid #000;
         color: #000;
       }
+      /* テーブルヘッダーを各ページに表示 */
+      thead { display: table-header-group; }
 
       /* 【修正】最終ページのご利用上の注意をカラー印刷する */
       .note-card {
@@ -539,7 +539,8 @@
 <!-- 印刷用 固定ヘッダー (全ページに強制表示) -->
 <div class="print-header-fixed">
   <div class="print-logo-section">
-    <img src="./logo.jpg" alt="Logo" class="print-logo">
+    <!-- ロゴ画像がない場合はaltテキストが表示されます。画像ファイル(logo.jpg)を同じフォルダに置いてください -->
+    <img src="./logo.jpg" alt="Logo" class="print-logo" onerror="this.style.display='none';">
     <span class="print-company-name">税理士法人松本会計事務所</span>
   </div>
   <div class="print-report-title">贈与税試算シミュレーションレポート</div>
@@ -557,7 +558,8 @@
   <header class="app-header">
     <div class="header-bar">
       <a href="https://takatrp.github.io/tool-portal/" class="brand">
-        <img src="./logo.jpg" alt="税理士法人松本会計事務所" class="brand-logo" />
+        <!-- ロゴ画像がない場合は非表示 -->
+        <img src="./logo.jpg" alt="税理士法人松本会計事務所" class="brand-logo" onerror="this.style.display='none';">
         <div class="brand-text">
           <h1 class="brand-title">贈与税試算ツール</h1>
           <p class="brand-subtitle">暦年課税（一般・特例）／相続時精算課税／長期シミュレーション</p>
@@ -774,7 +776,7 @@
         </div>
       </section>
 
-      <!-- 【修正】改ページ制御（print-break-before）を削除し、STEP1と同じページに表示 -->
+      <!-- STEP1と同じページに表示 -->
       <section class="card" id="multiAnnualCard">
         <div class="card-header">
           <h2 class="card-title">STEP2-A 暦年贈与シナリオ（毎年コツコツ型）</h2>
@@ -818,7 +820,7 @@
             </div>
           </div>
           <small style="display:block; margin-top:8px;">
-             ※ STEP1で設定した「受贈者の人数」全員に対して、上記条件で贈与を行う前提で計算します（人数分の資産減少効果・税額が発生します）。
+              ※ STEP1で設定した「受贈者の人数」全員に対して、上記条件で贈与を行う前提で計算します（人数分の資産減少効果・税額が発生します）。
           </small>
           <div class="btn-row">
             <button type="button" class="btn-calc" id="runMultiSimBtn">
@@ -962,7 +964,7 @@
     <a href="https://www.matsumoto-kaikei.or.jp/" target="_blank" rel="noopener license">税理士法人松本会計事務所</a> ｜ 
     <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank" rel="license noopener">CC BY-NC-SA 4.0</a> ｜ 
     <a href="/tool-portal/terms.html" target="_blank" rel="noopener">利用条件</a> ｜ 
-    <span id="build-rev">Rev.24</span>（<span id="last-updated-date"></span>）
+    <span id="build-rev">Rev.25</span>（<span id="last-updated-date"></span>）
   </footer>
 </div>
 
@@ -970,7 +972,7 @@
 (function(){
   'use strict';
 
-  const VERSION = 'Rev.24';
+  const VERSION = 'Rev.25';
 
   // 年号 & 最終更新日を自動反映
   (function syncFooterMeta(){
@@ -1113,37 +1115,57 @@
   // 全ての金額入力欄（カンマ整形）
   const yenInputs = document.querySelectorAll('.yen-input');
 
-  // 【修正】リアルタイムカンマ表示ロジック（スマホ入力バグ対応）
-  // Inputイベントで書き換えるのではなく、Focusでカンマ除去、Blurでカンマ付与を行う
+  // 【修正】リアルタイムカンマ入力 (IME対応版)
   yenInputs.forEach(input => {
-    // フォーカス時：カンマを外して数値のみにする
-    input.addEventListener('focus', function(){
-      let val = this.value;
-      if(val) {
-        val = val.replace(/,/g, '');
-        this.value = val;
-        this.select(); // 数値を選択状態にする（修正・削除しやすくする）
+    let isComposing = false;
+
+    // IME入力開始
+    input.addEventListener('compositionstart', () => {
+      isComposing = true;
+    });
+
+    // IME入力終了
+    input.addEventListener('compositionend', (e) => {
+      isComposing = false;
+      // 確定後の値を即フォーマット
+      formatInputValue(e.target);
+    });
+
+    // 入力イベント
+    input.addEventListener('input', (e) => {
+      // IME変換中でなければフォーマット実行
+      if (!isComposing) {
+        formatInputValue(e.target);
       }
     });
 
-    // フォーカスアウト時：カンマを付与する
-    input.addEventListener('blur', function(){
-      let val = this.value;
-      if(!val) return;
-      
-      // 全角数字を半角に変換（念のため）
-      val = val.replace(/[０-９]/g, s => String.fromCharCode(s.charCodeAt(0) - 0xFEE0));
-      
-      const raw = val.replace(/[^0-9]/g, '');
-      if(raw) {
-        this.value = Number(raw).toLocaleString('ja-JP');
+    // フォーマット処理関数
+    function formatInputValue(el) {
+      // カーソル位置の保持用（簡易的な実装）
+      const val = el.value;
+      if (!val) return;
+
+      // 全角数字を半角に
+      const normalized = val.replace(/[０-９]/g, s => String.fromCharCode(s.charCodeAt(0) - 0xFEE0));
+      // 数字以外を除去
+      const raw = normalized.replace(/[^0-9]/g, '');
+
+      if (raw) {
+        // カンマ区切り
+        const formatted = Number(raw).toLocaleString('ja-JP');
+        // 値が変更になる場合のみ更新（カーソル飛び防止のため）
+        if (el.value !== formatted) {
+          el.value = formatted;
+        }
       } else {
-        this.value = ''; // 数字が含まれていなければクリア
+        el.value = '';
       }
-    });
+    }
 
-    // 入力制限（数字以外を弾くのはUX上好ましいが、IME確定前の挙動に干渉しないよう慎重に実装するか、Blur任せにする）
-    // ここではあえてInputイベントでの強制置換を行わないことで、Android等のIME不具合を回避します。
+    // フォーカス時全選択 (使いやすさ向上)
+    input.addEventListener('focus', function() {
+      this.select();
+    });
   });
 
   // ユーティリティ
@@ -1706,7 +1728,7 @@
     
     // カンマ整形用イベント発火
     [multiEstateTotal, multiAnnualGiftPerPerson, multiSeisanInitialGift, multiSeisanAnnualGift, multiSeisanUsedSpecialBefore].forEach(el => {
-      if(el) el.dispatchEvent(new Event('blur')); // blurイベントでフォーマット
+      if(el) el.dispatchEvent(new Event('input')); 
     });
   }
 
@@ -1993,15 +2015,17 @@
           {
             label: '贈与税総額',
             data: [Math.round(totalGiftTaxA), Math.round(totalGiftTaxB)],
-            backgroundColor: '#578899', // くっきり
-            borderColor: '#476a7c',
+            // 【修正】明るい色へ変更 (Sky Blue)
+            backgroundColor: '#38bdf8', 
+            borderColor: '#0ea5e9',
             borderWidth: 1
           },
           {
             label: '相続税額',
             data: [Math.round(estateTaxA), Math.round(netEstateTaxB)],
-            backgroundColor: '#94a3b8', // 濃いめのグレー
-            borderColor: '#718096',
+            // 【修正】明るい色へ変更 (Orange)
+            backgroundColor: '#fb923c', 
+            borderColor: '#f97316',
             borderWidth: 1
           }
         ]
