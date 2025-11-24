@@ -35,7 +35,7 @@
       --btn-outline-border: #4a7d8f;
     }
     
-    /* 印刷用要素（画面では非表示） */
+    /* 印刷用ヘッダー（画面では非表示） */
     .print-only-header {
       display: none;
     }
@@ -612,13 +612,11 @@
 
     /* 印刷設定 */
     @media print {
-      /* ページ全体の設定: ヘッダー用の余白(margin-top)を確保 */
+      /* ページ全体の設定 */
       @page {
         size: auto;
-        margin-top: 25mm; /* ヘッダーが入るスペース */
-        margin-bottom: 15mm; /* フッター・ページ番号用スペース */
-        margin-left: 15mm;
-        margin-right: 15mm;
+        /* ヘッダー表示領域を確保するためにマージンを設定 */
+        margin: 25mm 15mm 15mm 15mm;
       }
 
       body {
@@ -628,14 +626,19 @@
         -webkit-print-color-adjust: exact;
         print-color-adjust: exact;
         line-height: 1.5;
+        /* デフォルトマージンをリセットし、@pageの設定に委ねる */
         margin: 0;
+        padding: 0;
       }
       
-      /* コンテンツ開始位置 */
+      /* コンテンツラッパーの設定 */
       .app {
-        padding-top: 0; 
+        display: block !important;
+        min-height: auto !important;
+        /* ヘッダーがコンテンツに被らないようにpaddingを設定 */
+        padding-top: 10px; 
       }
-      .layout { padding: 0; max-width: 100%; }
+      .layout { padding: 0; max-width: 100%; margin: 0; }
 
       /* 不要なUI要素を非表示 */
       .app-header, .btn-tutorial, .btn-row, .btn-ghost, .action-buttons, 
@@ -645,43 +648,54 @@
         display: none !important;
       }
 
-      /* 印刷用ヘッダー：固定表示で余白エリアに配置 */
+      /* 印刷用ヘッダー：position: fixed で全ページに表示 */
+      /* 上部座標を0に設定し、z-indexを最前面に */
       .print-only-header {
         display: flex !important;
         align-items: center;
         justify-content: flex-start;
         gap: 16px;
         
-        /* 固定配置 */
+        /* 固定配置設定 */
         position: fixed;
-        top: -20mm; /* @pageのマージン領域へ移動 */
+        top: 0;
         left: 0;
         width: 100%;
-        height: 18mm;
+        height: 50px;
         
         /* デザイン */
         border-bottom: 2px solid var(--accent);
-        background: #fff;
-        z-index: 2147483647; /* 最前面 */
+        background-color: #fff !important; /* 背景を白で塗りつぶし */
+        z-index: 99999; /* 最前面に表示 */
         padding-bottom: 5px;
+        
+        /* コンテンツに被らないよう背景を不透明に */
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
       }
+      
       .print-logo {
         height: 40px;
         width: auto;
+        display: block;
       }
+      
+      /* 社名テキスト */
       .print-text {
         font-size: 18px;
         font-weight: 700;
-        color: var(--ink);
+        color: #000 !important; /* 完全な黒を指定 */
+        display: block;
       }
 
       /* 強制改ページクラス */
       .print-break-before {
         break-before: page;
         page-break-before: always;
-        margin-top: 20px !important;
-        /* 要素が改ページ後にマージンで下がらないように調整 */
+        /* 改ページ後の要素がヘッダーに被らないようマージンを確保 */
+        margin-top: 60px !important; 
         padding-top: 20px;
+        border-top: none !important;
       }
 
       /* カードをレポートのセクション風に整形 */
@@ -692,6 +706,7 @@
         padding: 10px 0;
         margin-bottom: 15px; 
         page-break-inside: avoid; 
+        background: transparent;
       }
       .card-header {
         margin-bottom: 8px;
@@ -705,10 +720,11 @@
       /* 結果カードだけ強調 */
       .result-card {
         border: 2px solid var(--accent);
-        background: #f9fcff;
+        background: #f9fcff !important;
         padding: 12px;
         border-radius: 8px;
         page-break-inside: avoid;
+        -webkit-print-color-adjust: exact;
       }
 
       /* 入力フォームのテキスト化 */
@@ -721,6 +737,8 @@
         font-weight: bold;
         color: #000;
         font-size: 11pt;
+        -webkit-appearance: none;
+        appearance: none;
       }
       ::placeholder { color: transparent; }
       
@@ -1193,7 +1211,7 @@
     <a href="https://www.matsumoto-kaikei.or.jp/" target="_blank" rel="noopener license">税理士法人松本会計事務所</a> ｜ 
     <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank" rel="license noopener">CC BY-NC-SA 4.0</a> ｜ 
     <a href="/tool-portal/terms.html" target="_blank" rel="noopener">利用条件</a> ｜ 
-    <span id="build-rev">v1.5 Final</span>（<span id="last-updated-date"></span>）
+    <span id="build-rev">Rev.19</span>（<span id="last-updated-date"></span>）
   </footer>
 </div>
 
@@ -1201,7 +1219,7 @@
 (function(){
   'use strict';
 
-  const VERSION = 'v1.5 Final';
+  const VERSION = 'Rev.19';
 
   // 年号 & 最終更新日を自動反映
   (function syncFooterMeta(){
