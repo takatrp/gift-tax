@@ -648,8 +648,7 @@
         display: none !important;
       }
 
-      /* 印刷用ヘッダー：position: fixed で全ページに表示 */
-      /* 上部座標を0に設定し、z-indexを最前面に */
+      /* 印刷用ヘッダー：固定配置 */
       .print-only-header {
         display: flex !important;
         align-items: center;
@@ -727,6 +726,31 @@
         -webkit-print-color-adjust: exact;
       }
 
+      /* グリッドレイアウトを解除して縦並びに（グラフの重なり防止） */
+      .grid, .grid-2 {
+        display: block !important;
+      }
+      
+      /* グリッド内の各要素（グラフのセット）に余白を持たせる */
+      .grid > div {
+        margin-bottom: 40px !important; /* 十分な余白 */
+        page-break-inside: avoid; /* 途中で切れないように */
+      }
+
+      /* グラフエリアの高さと余白 */
+      .chart-container {
+        height: 280px !important; /* 高さを明示 */
+        width: 100% !important;
+        margin-bottom: 15px !important;
+        position: relative !important;
+        page-break-inside: avoid;
+      }
+      
+      canvas {
+        width: 100% !important;
+        height: 100% !important;
+      }
+
       /* 入力フォームのテキスト化 */
       input[type="number"], input[type="text"], select {
         border: none;
@@ -763,12 +787,6 @@
       .radio-chip input:checked + span::before {
         background: #000;
         border-color: #000;
-      }
-
-      /* グラフエリア */
-      .chart-container {
-        height: 220px;
-        page-break-inside: avoid;
       }
 
       /* 詳細テーブル */
@@ -1211,7 +1229,7 @@
     <a href="https://www.matsumoto-kaikei.or.jp/" target="_blank" rel="noopener license">税理士法人松本会計事務所</a> ｜ 
     <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank" rel="license noopener">CC BY-NC-SA 4.0</a> ｜ 
     <a href="/tool-portal/terms.html" target="_blank" rel="noopener">利用条件</a> ｜ 
-    <span id="build-rev">Rev.19</span>（<span id="last-updated-date"></span>）
+    <span id="build-rev">Rev.20</span>（<span id="last-updated-date"></span>）
   </footer>
 </div>
 
@@ -1219,7 +1237,7 @@
 (function(){
   'use strict';
 
-  const VERSION = 'Rev.19';
+  const VERSION = 'Rev.20';
 
   // 年号 & 最終更新日を自動反映
   (function syncFooterMeta(){
