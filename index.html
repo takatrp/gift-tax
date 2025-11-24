@@ -34,6 +34,12 @@
       --btn-soft-text: #4a7d8f;
       --btn-outline-border: #4a7d8f;
     }
+    
+    /* 印刷用ヘッダー（画面では非表示） */
+    .print-only-header {
+      display: none;
+    }
+
     *{box-sizing:border-box;}
     html,body{height:100%;}
     body{
@@ -616,6 +622,38 @@
       .mk-tour-mask, .mk-tour-focus, .mk-tour-panel {
         display: none !important;
       }
+      
+      /* 印刷用ヘッダーを表示（各ページ上部に固定） */
+      .print-only-header {
+        display: flex !important;
+        align-items: center;
+        justify-content: flex-start;
+        gap: 16px;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 60px;
+        padding: 0 0 10px 0;
+        border-bottom: 2px solid var(--accent);
+        background: #fff;
+        z-index: 9999;
+      }
+      .print-logo {
+        height: 45px;
+        width: auto;
+      }
+      .print-text {
+        font-size: 20px;
+        font-weight: 700;
+        color: var(--ink);
+      }
+
+      /* コンテンツの開始位置調整（ヘッダー被り防止） */
+      .app {
+        padding-top: 70px; 
+      }
+      
       .layout { padding: 0; max-width: 100%; }
       .card { box-shadow: none; border: 1px solid #ccc; margin-bottom: 20px; page-break-inside: avoid; }
       #detailsArea { display: block !important; overflow: visible !important; }
@@ -628,6 +666,13 @@
   </style>
 </head>
 <body>
+
+<!-- 印刷時のみ表示されるヘッダー -->
+<div class="print-only-header">
+  <img src="./logo.jpg" alt="ロゴ" class="print-logo">
+  <span class="print-text">税理士法人松本会計事務所</span>
+</div>
+
 <div class="app">
   <header class="app-header">
     <div class="header-bar">
