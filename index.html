@@ -612,10 +612,10 @@
 
     /* 印刷設定 */
     @media print {
-      /* ページ全体の設定: ヘッダー用の余白(margin-top)をさらに大きく確保 */
+      /* ページ全体の設定 */
       @page {
         size: A4;
-        margin-top: 30mm; /* 本文開始位置を30mm下げる */
+        margin-top: 20mm;
         margin-bottom: 15mm;
         margin-left: 15mm;
         margin-right: 15mm;
@@ -632,11 +632,11 @@
         padding: 0;
       }
       
-      /* コンテンツラッパーの設定 */
+      /* コンテンツラッパーの設定（ヘッダー分の余白を確保） */
       .app {
         display: block !important;
-        min-height: auto !important;
-        padding-top: 0; 
+        min-height: auto !重要;
+        padding-top: 24mm; /* 印刷ヘッダー高さ分の余白 */
       }
       .layout { padding: 0; max-width: 100%; margin: 0; }
 
@@ -648,40 +648,38 @@
         display: none !important;
       }
 
-      /* 印刷用ヘッダー：固定配置でマージン領域（マイナスtop）に表示させる */
-      /* top位置を調整し、確保した30mmのマージンエリア内に配置 */
+      /* 印刷用ヘッダー：各ページの上端に固定表示 */
       .print-only-header {
         display: flex !important;
         align-items: center;
         justify-content: flex-start;
-        gap: 16px;
-        
-        /* 固定配置設定 */
+        gap: 8mm;
+
         position: fixed;
-        top: -25mm; /* マージン領域の上部に配置 */
+        top: 0;
         left: 0;
-        width: 100%;
-        height: 20mm;
-        
-        /* デザイン */
-        border-bottom: 2px solid var(--accent);
+        right: 0;
+        height: 18mm;
+
+        padding: 0 15mm 3mm 15mm;
+
+        border-bottom: 0.6pt solid var(--accent);
         background-color: #fff !important;
         z-index: 99999;
-        padding-bottom: 5px;
-        
+
         -webkit-print-color-adjust: exact;
         print-color-adjust: exact;
       }
       
       .print-logo {
-        height: 40px;
+        height: 11mm;
         width: auto;
         display: block;
       }
       
       /* 社名テキスト */
       .print-text {
-        font-size: 18px;
+        font-size: 13pt;
         font-weight: 700;
         color: #000 !important;
         display: block;
@@ -1390,7 +1388,7 @@
   // 全ての金額入力欄（カンマ整形）
   const yenInputs = document.querySelectorAll('.yen-input');
 
-  // リアルタイムカンマ表示ロジック（修正：IME対応強化）
+  // リアルタイムカンマ表示ロジック（IME対応強化）
   yenInputs.forEach(input => {
     let isComposing = false;
     input.addEventListener('compositionstart', () => { isComposing = true; });
@@ -2274,14 +2272,14 @@
           {
             label: '贈与税総額',
             data: [Math.round(totalGiftTaxA), Math.round(totalGiftTaxB)],
-            backgroundColor: '#578899', // くっきり
+            backgroundColor: '#578899',
             borderColor: '#476a7c',
             borderWidth: 1
           },
           {
             label: '相続税額',
             data: [Math.round(estateTaxA), Math.round(netEstateTaxB)],
-            backgroundColor: '#94a3b8', // 濃いめのグレー
+            backgroundColor: '#94a3b8',
             borderColor: '#718096',
             borderWidth: 1
           }
@@ -2316,7 +2314,7 @@
       }
     });
 
-    // 2. 資産推移（折れ線グラフ + 最終手取り棒）
+    // 2. 資産推移（折れ線グラフ + 最終手取り）
     const labels2 = [...chartLabels, '相続税納税後'];
     const dataA2 = [...dataAssetA, finalNetA];
     const dataB2 = [...dataAssetB, finalNetB];
@@ -2340,7 +2338,7 @@
           {
             label: '精算課税：資産残高',
             data: dataB2,
-            borderColor: '#c86445', // よりはっきりしたテラコッタ
+            borderColor: '#c86445',
             backgroundColor: 'rgba(200, 100, 70, 0.1)',
             tension: 0.1,
             borderWidth: 2,
