@@ -52,7 +52,8 @@
     }
     .app-header{
       background:var(--bg);
-      padding:12px 16px 8px;
+      /* padding:12px 16px 8px; NOTE: 右端揃えのためpaddingを移動 */
+      padding: 12px 0 8px;
       border-bottom:1px solid #d4e1e7;
       position: sticky;
       top: 0;
@@ -67,6 +68,8 @@
       align-items:center;
       gap:12px;
       justify-content: space-between;
+      /* NOTE: .layoutのpaddingと合わせることで右端を揃える */
+      padding: 0 16px;
     }
     .brand{
       display:inline-flex;
@@ -645,6 +648,7 @@
     <section class="card">
       <div class="card-header">
         <h2 class="card-title">モード選択</h2>
+        <div class="badge">令和7年4月1日現在法令等ベース</div>
       </div>
       <div class="card-body">
         <div class="radio-row" id="tabSwitch">
@@ -669,7 +673,7 @@
       <section class="card">
         <div class="card-header">
           <h2 class="card-title">STEP1 計算方法の選択</h2>
-          <div class="badge">令和7年4月1日現在法令等ベース</div>
+          <!-- バッジをここに移動しました -->
         </div>
         <div class="card-body">
           <div class="field">
