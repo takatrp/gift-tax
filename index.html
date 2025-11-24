@@ -35,8 +35,8 @@
       --btn-outline-border: #4a7d8f;
     }
     
-    /* 印刷用ヘッダー（画面では非表示） */
-    .print-only-header {
+    /* 印刷用要素（画面では非表示） */
+    .print-only-footer {
       display: none;
     }
 
@@ -615,14 +615,17 @@
       body {
         background: #fff;
         color: #000;
-        font-size: 12pt;
+        font-size: 11pt;
         -webkit-print-color-adjust: exact;
         print-color-adjust: exact;
         line-height: 1.5;
+        /* フッター固定用余白 */
+        margin-bottom: 15mm; 
       }
-      /* コンテンツの開始位置調整（ヘッダー被り防止） */
+      
+      /* コンテンツの開始位置調整 */
       .app {
-        padding-top: 70px; 
+        padding-top: 0; 
       }
       .layout { padding: 0; max-width: 100%; }
 
@@ -634,30 +637,37 @@
         display: none !important;
       }
 
-      /* 印刷用ヘッダーを表示（各ページ上部に固定） */
-      .print-only-header {
+      /* 印刷用フッター（各ページ下部に固定） */
+      .print-only-footer {
         display: flex !important;
         align-items: center;
         justify-content: flex-start;
-        gap: 16px;
+        gap: 12px;
         position: fixed;
-        top: 0;
+        bottom: 0;
         left: 0;
         width: 100%;
-        height: 60px;
-        padding: 0 0 10px 0;
-        border-bottom: 2px solid var(--accent);
+        height: 40px;
+        padding: 5px 0;
+        border-top: 1px solid #ccc;
         background: #fff;
         z-index: 9999;
       }
       .print-logo {
-        height: 45px;
+        height: 30px;
         width: auto;
       }
       .print-text {
-        font-size: 20px;
+        font-size: 12px;
         font-weight: 700;
-        color: var(--ink);
+        color: var(--muted);
+      }
+
+      /* 強制改ページクラス */
+      .print-break-before {
+        break-before: page;
+        page-break-before: always;
+        margin-top: 30px !important;
       }
 
       /* カードをレポートのセクション風に整形 */
@@ -726,7 +736,7 @@
 
       /* グラフエリア */
       .chart-container {
-        height: 300px;
+        height: 250px; /* 印刷時は少し高さを抑える */
         page-break-inside: avoid;
       }
 
@@ -741,7 +751,6 @@
         background: #eee !important; 
         position: static !important; 
       }
-      /* テーブル背景色の印刷対応 */
       .detail-table th[style*="background:#f0f8fa"], 
       .detail-table td[style*="background:#f0f8fa"] {
         background-color: #f0f8fa !important;
@@ -752,13 +761,23 @@
         background-color: #fff3f3 !important;
         -webkit-print-color-adjust: exact;
       }
+      
+      /* ページ設定 */
+      @page {
+        size: auto;
+        margin: 15mm 15mm 20mm 15mm; /* 下部マージンを広めに確保 */
+        /* 以下は一部ブラウザ(Firefox等)でのみ有効なページ番号設定 */
+        @bottom-right {
+          content: counter(page);
+        }
+      }
     }
   </style>
 </head>
 <body>
 
-<!-- 印刷時のみ表示されるヘッダー -->
-<div class="print-only-header">
+<!-- 印刷時のみ表示されるフッター -->
+<div class="print-only-footer">
   <img src="./logo.jpg" alt="ロゴ" class="print-logo">
   <span class="print-text">税理士法人松本会計事務所</span>
 </div>
@@ -1076,7 +1095,8 @@
           </div>
 
           <!-- グラフ描画エリア -->
-          <div style="display:flex; align-items:center; justify-content:space-between; margin:24px 0 12px; flex-wrap:wrap; gap:10px;">
+          <!-- クラスを追加して改ページ制御 -->
+          <div class="print-break-before" style="display:flex; align-items:center; justify-content:space-between; margin:24px 0 12px; flex-wrap:wrap; gap:10px;">
             <h3 style="margin:0; font-size:16px; font-weight:700; color:var(--accent-dark);">
               シミュレーション結果の可視化
             </h3>
