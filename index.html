@@ -814,6 +814,7 @@
       <section class="card" id="multiCommonCard">
         <div class="card-header">
           <h2 class="card-title">STEP1 長期シミュレーションの前提条件</h2>
+          <button type="button" class="btn-tutorial" id="loadSampleBtn" style="font-size:12px; padding:4px 10px;">サンプル読込</button>
         </div>
         <div class="card-body">
           <div class="grid grid-3">
@@ -828,18 +829,22 @@
               <small>相続が発生するまでの期間。</small>
             </div>
             <div class="field">
-              <label>受贈者の人数（法定相続人）</label>
-              <input type="number" id="multiRecipients" class="align-left" placeholder="例）2" min="1" step="1" />
-              <small>贈与を受ける子・孫の人数。<strong>法定相続人数としても計算に使用します。</strong></small>
-            </div>
-          </div>
-          <div class="grid grid-2" style="margin-top:12px;">
-            <div class="field">
               <label>年間運用利回り（％）</label>
               <input type="number" id="multiReturnRate" class="align-left" placeholder="例）1.0" step="0.1" />
               <small>相続財産全体の平均的な増減率。</small>
             </div>
-            <!-- 修正: 実効税率の入力欄を削除（ロジック内で自動計算） -->
+          </div>
+          <div class="grid grid-2" style="margin-top:12px;">
+            <div class="field">
+              <label>受贈者の人数</label>
+              <input type="number" id="multiRecipients" class="align-left" placeholder="例）2" min="1" step="1" />
+              <small>贈与を受ける子・孫の人数。</small>
+            </div>
+            <div class="field">
+              <label>法定相続人の数</label>
+              <input type="number" id="multiHeirs" class="align-left" placeholder="例）2" min="1" step="1" />
+              <small>相続税の基礎控除計算等に使用する法定相続人の数。</small>
+            </div>
           </div>
         </div>
       </section>
@@ -857,7 +862,7 @@
             </div>
           </div>
           <small>
-            ※ STEP1で設定した人数全員に、毎年同額を贈与する前提で計算します。
+            ※ STEP1で設定した「受贈者の人数」全員に、毎年同額を贈与する前提で計算します。
           </small>
         </div>
       </section>
@@ -887,7 +892,7 @@
             </div>
           </div>
           <small style="display:block; margin-top:8px;">
-             ※ STEP1で設定した人数全員に対して、上記条件で贈与を行う前提で計算します（人数分の資産減少効果・税額が発生します）。
+             ※ STEP1で設定した「受贈者の人数」全員に対して、上記条件で贈与を行う前提で計算します（人数分の資産減少効果・税額が発生します）。
           </small>
           <div class="btn-row">
             <button type="button" class="btn-calc" id="runMultiSimBtn">
@@ -940,7 +945,7 @@
             <h3 style="margin:0; font-size:16px; font-weight:700; color:var(--accent-dark);">
               シミュレーション結果の可視化
             </h3>
-            <button type="button" class="btn-ghost" id="toggleDetailsBtn" style="font-size:12px; padding:6px 12px;">詳細データを見る</button>
+            <button type="button" class="btn-tutorial" id="toggleDetailsBtn" style="font-size:12px; padding:4px 10px;">詳細データを見る</button>
           </div>
           
           <div class="grid grid-2">
@@ -1145,6 +1150,7 @@
   const multiYears = document.getElementById('multiYears');
   const multiReturnRate = document.getElementById('multiReturnRate');
   const multiRecipients = document.getElementById('multiRecipients'); 
+  const multiHeirs = document.getElementById('multiHeirs');
 
   const multiAnnualGiftPerPerson = document.getElementById('multiAnnualGiftPerPerson');
 
@@ -1154,6 +1160,7 @@
 
   const runMultiSimBtn = document.getElementById('runMultiSimBtn');
   const multiClearBtn = document.getElementById('multiClearBtn');
+  const loadSampleBtn = document.getElementById('loadSampleBtn');
   const multiResultCard = document.getElementById('multiResultCard');
 
   const multiResultSummary = document.getElementById('multiResultSummary');
@@ -1754,10 +1761,29 @@
     // multiEffRate削除済み
     if(multiAnnualGiftPerPerson) multiAnnualGiftPerPerson.value = '';
     if(multiRecipients) multiRecipients.value = ''; 
+    if(multiHeirs) multiHeirs.value = '';
     if(multiSeisanInitialGift) multiSeisanInitialGift.value = '';
     if(multiSeisanAnnualGift) multiSeisanAnnualGift.value = '';
     if(multiSeisanUsedSpecialBefore) multiSeisanUsedSpecialBefore.value = '';
     resetMultiResult();
+  }
+
+  // サンプルデータ読込
+  function loadSampleData(){
+    if(multiEstateTotal) multiEstateTotal.value = '150,000,000';
+    if(multiYears) multiYears.value = '10';
+    if(multiReturnRate) multiReturnRate.value = '1.0';
+    if(multiRecipients) multiRecipients.value = '2';
+    if(multiHeirs) multiHeirs.value = '2';
+    if(multiAnnualGiftPerPerson) multiAnnualGiftPerPerson.value = '3,100,000';
+    if(multiSeisanInitialGift) multiSeisanInitialGift.value = '25,000,000';
+    if(multiSeisanAnnualGift) multiSeisanAnnualGift.value = '1,100,000';
+    if(multiSeisanUsedSpecialBefore) multiSeisanUsedSpecialBefore.value = '0';
+    
+    // カンマ整形用イベント発火
+    [multiEstateTotal, multiAnnualGiftPerPerson, multiSeisanInitialGift, multiSeisanAnnualGift, multiSeisanUsedSpecialBefore].forEach(el => {
+      if(el) el.dispatchEvent(new Event('input'));
+    });
   }
 
   function handleMultiSim(){
@@ -1778,14 +1804,15 @@
     let r = parseNumber(multiReturnRate, 0) / 100;
     if(!Number.isFinite(r) || r < -1) r = 0;
 
-    // 実効税率入力欄削除のため、ここで取得しない
-    // const effRate = ...
-
     const giftPerPersonA = parseYenInput(multiAnnualGiftPerPerson);
     
     let recipients = parseNumber(multiRecipients, 0);
     recipients = Math.floor(recipients);
     if(recipients < 0) recipients = 0;
+
+    let heirs = parseNumber(multiHeirs, 0);
+    heirs = Math.floor(heirs);
+    if(heirs < 0) heirs = 0;
 
     const initialGiftB = parseYenInput(multiSeisanInitialGift);
     const annualGiftB = parseYenInput(multiSeisanAnnualGift);
@@ -1846,8 +1873,8 @@
     }
 
     const estateBaseA = estateA + addbackA;
-    // 修正: 入力値を使わず、速算表から相続税額を計算する
-    const estateTaxA = calcInheritanceTaxAmount(estateBaseA, recipients);
+    // 修正: 入力値を使わず、速算表から相続税額を計算する（法定相続人数を使用）
+    const estateTaxA = calcInheritanceTaxAmount(estateBaseA, heirs);
     const totalTaxA = totalGiftTaxA + estateTaxA;
     const finalNetA = Math.max(0, estateA - estateTaxA);
 
@@ -1935,8 +1962,8 @@
     }
 
     const estateBaseB = estateB + addbackB;
-    // 修正: 入力値を使わず、速算表から相続税額を計算する
-    const estateTaxB_Total = calcInheritanceTaxAmount(estateBaseB, recipients);
+    // 修正: 入力値を使わず、速算表から相続税額を計算する（法定相続人数を使用）
+    const estateTaxB_Total = calcInheritanceTaxAmount(estateBaseB, heirs);
 
     // 精算課税分の贈与税控除
     let netEstateTaxB;
@@ -2273,6 +2300,7 @@
 
   if(runMultiSimBtn) runMultiSimBtn.addEventListener('click', handleMultiSim);
   if(multiClearBtn) multiClearBtn.addEventListener('click', clearMultiInputs);
+  if(loadSampleBtn) loadSampleBtn.addEventListener('click', loadSampleData);
 
   if(copyResultBtn) copyResultBtn.addEventListener('click', handleCopyResult);
   if(resetAllBtn) resetAllBtn.addEventListener('click', handleResetAll);
