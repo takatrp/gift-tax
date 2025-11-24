@@ -307,8 +307,8 @@
     @media print {
       @page {
         size: A4;
-        margin-top: 25mm;
-        margin-bottom: 20mm;
+        margin-top: 25mm; /* ヘッダー用スペース */
+        margin-bottom: 15mm; /* フッター用スペース */
         margin-left: 15mm;
         margin-right: 15mm;
       }
@@ -349,7 +349,7 @@
         border-bottom: 2px solid var(--accent);
         padding-bottom: 5px;
         margin-bottom: 0;
-        background-color: #fff;
+        background-color: #fff; /* 背景色を追加して重なり防止 */
         z-index: 9999;
       }
 
@@ -357,7 +357,7 @@
       .print-footer-fixed {
         display: flex !important;
         position: fixed;
-        bottom: -10mm;
+        bottom: -5mm;
         left: 0;
         width: 100%;
         height: 10mm;
@@ -524,6 +524,7 @@
 
       .grid, .grid-2, .grid-3 { display: block !important; }
       .grid > div, .grid-2 > div { margin-bottom: 5px; page-break-inside: avoid; }
+      
       .print-break-before {
         break-before: page;
         page-break-before: always;
@@ -773,8 +774,8 @@
         </div>
       </section>
 
-      <!-- 改ページを設定（print-break-before） -->
-      <section class="card print-break-before" id="multiAnnualCard">
+      <!-- 【修正】改ページ制御（print-break-before）を削除し、STEP1と同じページに表示 -->
+      <section class="card" id="multiAnnualCard">
         <div class="card-header">
           <h2 class="card-title">STEP2-A 暦年贈与シナリオ（毎年コツコツ型）</h2>
         </div>
@@ -1112,41 +1113,37 @@
   // 全ての金額入力欄（カンマ整形）
   const yenInputs = document.querySelectorAll('.yen-input');
 
-  // リアルタイムカンマ表示ロジック（修正：IME対応強化）
+  // 【修正】リアルタイムカンマ表示ロジック（スマホ入力バグ対応）
+  // Inputイベントで書き換えるのではなく、Focusでカンマ除去、Blurでカンマ付与を行う
   yenInputs.forEach(input => {
-    let isComposing = false;
-    input.addEventListener('compositionstart', () => { isComposing = true; });
-    input.addEventListener('compositionend', () => { 
-      isComposing = false; 
-      input.dispatchEvent(new Event('input')); 
+    // フォーカス時：カンマを外して数値のみにする
+    input.addEventListener('focus', function(){
+      let val = this.value;
+      if(val) {
+        val = val.replace(/,/g, '');
+        this.value = val;
+        this.select(); // 数値を選択状態にする（修正・削除しやすくする）
+      }
     });
 
-    input.addEventListener('input', function(){
-      if(isComposing) return; // 変換中は処理しない
-      const cursor = this.selectionStart;
-      const val = this.value;
-      const digitsBeforeCursor = (val.slice(0, cursor).match(/[0-9]/g) || []).length;
+    // フォーカスアウト時：カンマを付与する
+    input.addEventListener('blur', function(){
+      let val = this.value;
+      if(!val) return;
+      
+      // 全角数字を半角に変換（念のため）
+      val = val.replace(/[０-９]/g, s => String.fromCharCode(s.charCodeAt(0) - 0xFEE0));
+      
       const raw = val.replace(/[^0-9]/g, '');
-      if (!raw) {
-        this.value = '';
-        return;
+      if(raw) {
+        this.value = Number(raw).toLocaleString('ja-JP');
+      } else {
+        this.value = ''; // 数字が含まれていなければクリア
       }
-      const formatted = Number(raw).toLocaleString('ja-JP');
-      this.value = formatted;
-      let newCursor = 0;
-      let digitsSeen = 0;
-      for (let i = 0; i < formatted.length; i++) {
-        if (/[0-9]/.test(formatted[i])) {
-          digitsSeen++;
-        }
-        if (digitsSeen === digitsBeforeCursor) {
-          newCursor = i + 1;
-          break;
-        }
-      }
-      if (digitsBeforeCursor === 0) newCursor = 0;
-      this.setSelectionRange(newCursor, newCursor);
     });
+
+    // 入力制限（数字以外を弾くのはUX上好ましいが、IME確定前の挙動に干渉しないよう慎重に実装するか、Blur任せにする）
+    // ここではあえてInputイベントでの強制置換を行わないことで、Android等のIME不具合を回避します。
   });
 
   // ユーティリティ
@@ -1709,7 +1706,7 @@
     
     // カンマ整形用イベント発火
     [multiEstateTotal, multiAnnualGiftPerPerson, multiSeisanInitialGift, multiSeisanAnnualGift, multiSeisanUsedSpecialBefore].forEach(el => {
-      if(el) el.dispatchEvent(new Event('input'));
+      if(el) el.dispatchEvent(new Event('blur')); // blurイベントでフォーマット
     });
   }
 
