@@ -58,6 +58,7 @@
     }
     .app-header{
       background:var(--bg);
+      /* padding:12px 16px 8px; NOTE: 右端揃えのためpaddingを移動 */
       padding: 12px 0 8px;
       border-bottom:1px solid #d4e1e7;
       position: sticky;
@@ -73,6 +74,7 @@
       align-items:center;
       gap:12px;
       justify-content: space-between;
+      /* NOTE: .layoutのpaddingと合わせることで右端を揃える */
       padding: 0 16px;
     }
     .brand{
@@ -608,11 +610,11 @@
       .mk-tour-panel{left:12px;right:12px;max-width:calc(100vw - 24px);}
     }
 
-    /* 印刷設定 */
+    /* 印刷設定 - Table Header Hack */
     @media print {
       @page {
         size: A4;
-        margin: 15mm; /* 標準的な余白に設定 */
+        margin: 15mm;
       }
 
       body {
@@ -625,21 +627,25 @@
         margin: 0;
         padding: 0;
       }
+
+      /* 画面用ヘッダーは非表示 */
+      .app-header { display: none !important; }
       
-      /* アプリ全体をテーブルとして表示（ヘッダー繰り返し用） */
+      /* アプリ全体をテーブルとして扱う */
       .app {
         display: table !important;
         width: 100%;
-        min-height: auto !important;
-        padding-top: 0;
+        border-collapse: collapse;
       }
       
-      /* ヘッダーをテーブルヘッダーグループとして設定 */
+      /* 印刷専用ヘッダーをテーブルヘッダーグループにする */
+      /* これにより、改ページごとに自動的に先頭に挿入される */
       .print-only-header {
         display: table-header-group !important;
+        height: 25mm; /* ヘッダー領域の高さ確保 */
       }
       
-      /* ヘッダーの中身のスタイル */
+      /* ヘッダー内部のスタイル */
       .print-header-content {
         display: flex;
         align-items: center;
@@ -647,7 +653,7 @@
         gap: 16px;
         height: 20mm;
         border-bottom: 2px solid var(--accent);
-        margin-bottom: 10mm; /* ヘッダーと本文の間隔 */
+        margin-bottom: 5mm; /* 本文との間隔 */
         padding-bottom: 5px;
       }
 
@@ -664,16 +670,18 @@
         display: block;
       }
 
-      /* コンテンツ本体をテーブル行グループとして設定 */
+      /* メインコンテンツをテーブル行グループにする */
       .layout {
         display: table-row-group !important;
-        padding: 0; 
-        max-width: 100%; 
-        margin: 0; 
+      }
+      
+      /* テーブルセルとしての挙動を抑制するためのラッパー的な扱い */
+      .layout > * {
+        break-inside: avoid;
       }
 
       /* 不要なUI要素を非表示 */
-      .app-header, .btn-tutorial, .btn-row, .btn-ghost, .action-buttons, 
+      .btn-tutorial, .btn-row, .btn-ghost, .action-buttons, 
       footer.mk-mini, .mk-tour-mask, .mk-tour-focus, .mk-tour-panel,
       #startTour, #toggleDetailsBtn, #loadSampleBtn, .pill-switch,
       .app-footer {
@@ -684,9 +692,9 @@
       .print-break-before {
         break-before: page;
         page-break-before: always;
-        margin-top: 0 !important;
-        padding-top: 20px !important;
+        margin-top: 20px !important;
         border-top: none !important;
+        display: block !important; /* テーブルレイアウト内でもブロックとして振る舞わせる */
       }
 
       /* カードをレポートのセクション風に整形 */
@@ -695,9 +703,10 @@
         border: none; 
         border-bottom: 2px solid #eee;
         padding: 10px 0;
-        margin-bottom: 15px; 
+        margin-bottom: 20px; 
         page-break-inside: avoid; 
         background: transparent;
+        display: block; /* 明示的にブロック */
       }
       .card-header {
         margin-bottom: 8px;
@@ -712,7 +721,7 @@
       .result-card {
         border: 2px solid var(--accent);
         background: #f9fcff !important;
-        padding: 12px;
+        padding: 15px;
         border-radius: 8px;
         page-break-inside: avoid;
         -webkit-print-color-adjust: exact;
@@ -723,17 +732,16 @@
         display: block !important;
       }
       
-      /* グリッド内の各要素（グラフのセット）に余白を持たせる */
       .grid > div {
-        margin-bottom: 40px !important; /* 十分な余白 */
-        page-break-inside: avoid; /* 途中で切れないように */
+        margin-bottom: 40px !important; 
+        page-break-inside: avoid; 
       }
 
       /* グラフエリアの高さと余白 */
       .chart-container {
-        height: 280px !important; /* 高さを明示 */
+        height: 280px !important;
         width: 100% !important;
-        margin-bottom: 15px !important;
+        margin-bottom: 20px !important;
         position: relative !important;
         page-break-inside: avoid;
       }
@@ -781,18 +789,13 @@
         border-color: #000;
       }
 
-      /* 詳細テーブル: display:blockにして改ページを効かせる */
+      /* 詳細テーブル */
       #detailsArea { 
         display: block !important; 
         overflow: visible !important; 
+        margin-top: 30px !important;
       }
       
-      /* 改ページ強制用のクラス適用 */
-      #detailsArea.print-break-before {
-        break-before: page;
-        page-break-before: always;
-      }
-
       .detail-table { font-size: 9pt; }
       .detail-table th, .detail-table td {
         border: 1px solid #000;
@@ -817,8 +820,10 @@
 </head>
 <body>
 
+<!-- 印刷時はアプリ全体をテーブルとして扱う -->
 <div class="app">
-  <!-- 印刷時のみ表示されるヘッダー（.appの中に配置） -->
+  
+  <!-- 印刷用ヘッダー（Table Headerとして機能） -->
   <div class="print-only-header">
     <div class="print-header-content">
       <img src="./logo.jpg" alt="ロゴ" class="print-logo">
@@ -826,6 +831,7 @@
     </div>
   </div>
 
+  <!-- 画面表示用ヘッダー -->
   <header class="app-header">
     <div class="header-bar">
       <a href="https://takatrp.github.io/tool-portal/" class="brand">
@@ -839,6 +845,7 @@
     </div>
   </header>
 
+  <!-- メインコンテンツ（Table Bodyとして機能） -->
   <main class="layout">
 
     <!-- モードタブ切替 -->
@@ -1234,7 +1241,7 @@
     <a href="https://www.matsumoto-kaikei.or.jp/" target="_blank" rel="noopener license">税理士法人松本会計事務所</a> ｜ 
     <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank" rel="license noopener">CC BY-NC-SA 4.0</a> ｜ 
     <a href="/tool-portal/terms.html" target="_blank" rel="noopener">利用条件</a> ｜ 
-    <span id="build-rev">Rev.23</span>（<span id="last-updated-date"></span>）
+    <span id="build-rev">Rev.24</span>（<span id="last-updated-date"></span>）
   </footer>
 </div>
 
@@ -1242,7 +1249,7 @@
 (function(){
   'use strict';
 
-  const VERSION = 'Rev.23';
+  const VERSION = 'Rev.24';
 
   // 年号 & 最終更新日を自動反映
   (function syncFooterMeta(){
