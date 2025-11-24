@@ -35,7 +35,7 @@
       --btn-outline-border: #4a7d8f;
     }
     
-    /* 印刷用ヘッダー（画面では非表示） */
+    /* 印刷用要素（画面では非表示） */
     .print-only-header {
       display: none;
     }
@@ -612,11 +612,13 @@
 
     /* 印刷設定 */
     @media print {
-      /* ページ全体の設定 */
+      /* ページ全体の設定: ヘッダー用の余白(margin-top)を確保して被りを防止 */
       @page {
         size: auto;
-        /* ヘッダー表示領域を確保するためにマージンを設定 */
-        margin: 25mm 15mm 15mm 15mm;
+        margin-top: 20mm; /* ヘッダーが入るスペースを確保 */
+        margin-bottom: 15mm;
+        margin-left: 15mm;
+        margin-right: 15mm;
       }
 
       body {
@@ -626,7 +628,6 @@
         -webkit-print-color-adjust: exact;
         print-color-adjust: exact;
         line-height: 1.5;
-        /* デフォルトマージンをリセットし、@pageの設定に委ねる */
         margin: 0;
         padding: 0;
       }
@@ -635,8 +636,7 @@
       .app {
         display: block !important;
         min-height: auto !important;
-        /* ヘッダーがコンテンツに被らないようにpaddingを設定 */
-        padding-top: 10px; 
+        padding-top: 0; 
       }
       .layout { padding: 0; max-width: 100%; margin: 0; }
 
@@ -648,7 +648,8 @@
         display: none !important;
       }
 
-      /* 印刷用ヘッダー：固定配置 */
+      /* 印刷用ヘッダー：固定配置でマージン領域（マイナスtop）に表示させる */
+      /* これにより本文開始位置(top:0)と重ならずにヘッダーを表示可能 */
       .print-only-header {
         display: flex !important;
         align-items: center;
@@ -657,18 +658,18 @@
         
         /* 固定配置設定 */
         position: fixed;
-        top: 0;
+        /* @pageのmargin-top領域に食い込ませる */
+        top: -15mm; 
         left: 0;
         width: 100%;
-        height: 50px;
+        height: 15mm;
         
         /* デザイン */
         border-bottom: 2px solid var(--accent);
-        background-color: #fff !important; /* 背景を白で塗りつぶし */
-        z-index: 99999; /* 最前面に表示 */
+        background-color: #fff !important;
+        z-index: 99999;
         padding-bottom: 5px;
         
-        /* コンテンツに被らないよう背景を不透明に */
         -webkit-print-color-adjust: exact;
         print-color-adjust: exact;
       }
@@ -683,7 +684,7 @@
       .print-text {
         font-size: 18px;
         font-weight: 700;
-        color: #000 !important; /* 完全な黒を指定 */
+        color: #000 !important;
         display: block;
       }
 
@@ -691,9 +692,8 @@
       .print-break-before {
         break-before: page;
         page-break-before: always;
-        /* 改ページ後の要素がヘッダーに被らないようマージンを確保 */
-        margin-top: 60px !important; 
-        padding-top: 20px;
+        margin-top: 30px !important; /* 改ページ後の余白 */
+        padding-top: 10px;
         border-top: none !important;
       }
 
@@ -790,7 +790,10 @@
       }
 
       /* 詳細テーブル */
-      #detailsArea { display: block !important; overflow: visible !important; }
+      #detailsArea { 
+        display: block !important; 
+        overflow: visible !important; 
+      }
       .detail-table { font-size: 9pt; }
       .detail-table th, .detail-table td {
         border: 1px solid #000;
@@ -1165,7 +1168,8 @@
           </div>
 
           <!-- 詳細データテーブル（初期非表示） -->
-          <div id="detailsArea" class="hidden" style="margin-top:16px; overflow-x:auto; border-top:1px dashed var(--border); padding-top:16px;">
+          <!-- ここにも改ページ制御を追加 -->
+          <div id="detailsArea" class="hidden print-break-before" style="margin-top:16px; overflow-x:auto; border-top:1px dashed var(--border); padding-top:16px;">
             <div style="font-size:14px; font-weight:700; margin-bottom:8px; color:var(--accent-dark);">▼ 年次シミュレーション詳細</div>
             <table class="detail-table" id="detailsTable">
               <thead>
@@ -1229,7 +1233,7 @@
     <a href="https://www.matsumoto-kaikei.or.jp/" target="_blank" rel="noopener license">税理士法人松本会計事務所</a> ｜ 
     <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank" rel="license noopener">CC BY-NC-SA 4.0</a> ｜ 
     <a href="/tool-portal/terms.html" target="_blank" rel="noopener">利用条件</a> ｜ 
-    <span id="build-rev">Rev.20</span>（<span id="last-updated-date"></span>）
+    <span id="build-rev">Rev.21</span>（<span id="last-updated-date"></span>）
   </footer>
 </div>
 
@@ -1237,7 +1241,7 @@
 (function(){
   'use strict';
 
-  const VERSION = 'Rev.20';
+  const VERSION = 'Rev.21';
 
   // 年号 & 最終更新日を自動反映
   (function syncFooterMeta(){
