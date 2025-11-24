@@ -36,7 +36,7 @@
     }
     
     /* 印刷用要素（画面では非表示） */
-    .print-only-footer {
+    .print-only-header {
       display: none;
     }
 
@@ -612,6 +612,15 @@
 
     /* 印刷設定 */
     @media print {
+      /* ページ全体の設定: ヘッダー用の余白(margin-top)を確保 */
+      @page {
+        size: auto;
+        margin-top: 25mm; /* ヘッダーが入るスペース */
+        margin-bottom: 15mm; /* フッター・ページ番号用スペース */
+        margin-left: 15mm;
+        margin-right: 15mm;
+      }
+
       body {
         background: #fff;
         color: #000;
@@ -619,11 +628,10 @@
         -webkit-print-color-adjust: exact;
         print-color-adjust: exact;
         line-height: 1.5;
-        /* フッター固定用余白 */
-        margin-bottom: 15mm; 
+        margin: 0;
       }
       
-      /* コンテンツの開始位置調整 */
+      /* コンテンツ開始位置 */
       .app {
         padding-top: 0; 
       }
@@ -637,37 +645,43 @@
         display: none !important;
       }
 
-      /* 印刷用フッター（各ページ下部に固定） */
-      .print-only-footer {
+      /* 印刷用ヘッダー：固定表示で余白エリアに配置 */
+      .print-only-header {
         display: flex !important;
         align-items: center;
         justify-content: flex-start;
-        gap: 12px;
+        gap: 16px;
+        
+        /* 固定配置 */
         position: fixed;
-        bottom: 0;
+        top: -20mm; /* @pageのマージン領域へ移動 */
         left: 0;
         width: 100%;
-        height: 50px; /* 高さを確保 */
-        padding: 10px 20px;
-        border-top: 1px solid #ccc;
-        background: #fff !important; /* 背景を白で塗りつぶし */
-        z-index: 2147483647; /* 最大値で最前面に表示 */
+        height: 18mm;
+        
+        /* デザイン */
+        border-bottom: 2px solid var(--accent);
+        background: #fff;
+        z-index: 2147483647; /* 最前面 */
+        padding-bottom: 5px;
       }
       .print-logo {
-        height: 30px;
+        height: 40px;
         width: auto;
       }
       .print-text {
-        font-size: 12px;
+        font-size: 18px;
         font-weight: 700;
-        color: var(--muted);
+        color: var(--ink);
       }
 
       /* 強制改ページクラス */
       .print-break-before {
         break-before: page;
         page-break-before: always;
-        margin-top: 30px !important;
+        margin-top: 20px !important;
+        /* 要素が改ページ後にマージンで下がらないように調整 */
+        padding-top: 20px;
       }
 
       /* カードをレポートのセクション風に整形 */
@@ -676,15 +690,15 @@
         border: none; 
         border-bottom: 2px solid #eee;
         padding: 10px 0;
-        margin-bottom: 20px; 
+        margin-bottom: 15px; 
         page-break-inside: avoid; 
       }
       .card-header {
-        margin-bottom: 10px;
+        margin-bottom: 8px;
         border-bottom: none;
       }
       .card-title {
-        font-size: 14pt;
+        font-size: 13pt;
         color: #000;
       }
 
@@ -692,7 +706,7 @@
       .result-card {
         border: 2px solid var(--accent);
         background: #f9fcff;
-        padding: 15px;
+        padding: 12px;
         border-radius: 8px;
         page-break-inside: avoid;
       }
@@ -706,7 +720,7 @@
         width: auto;
         font-weight: bold;
         color: #000;
-        font-size: 12pt;
+        font-size: 11pt;
       }
       ::placeholder { color: transparent; }
       
@@ -716,7 +730,7 @@
         font-size: 10pt;
       }
       
-      /* 選択肢の表示調整（簡易的） */
+      /* 選択肢の表示調整 */
       .radio-row { gap: 5px; }
       .radio-chip { 
         border: 1px solid #ddd; 
@@ -724,7 +738,6 @@
         font-size: 9pt;
         color: #999;
       }
-      /* 選択されているものだけ強調 */
       .radio-chip input:checked + span {
         color: #000;
         font-weight: bold;
@@ -736,7 +749,7 @@
 
       /* グラフエリア */
       .chart-container {
-        height: 250px; /* 印刷時は少し高さを抑える */
+        height: 220px;
         page-break-inside: avoid;
       }
 
@@ -761,23 +774,13 @@
         background-color: #fff3f3 !important;
         -webkit-print-color-adjust: exact;
       }
-      
-      /* ページ設定 */
-      @page {
-        size: auto;
-        margin: 15mm 15mm 20mm 15mm; /* 下部マージンを広めに確保 */
-        /* 以下は一部ブラウザ(Firefox等)でのみ有効なページ番号設定 */
-        @bottom-right {
-          content: counter(page);
-        }
-      }
     }
   </style>
 </head>
 <body>
 
-<!-- 印刷時のみ表示されるフッター -->
-<div class="print-only-footer">
+<!-- 印刷時のみ表示されるヘッダー -->
+<div class="print-only-header">
   <img src="./logo.jpg" alt="ロゴ" class="print-logo">
   <span class="print-text">税理士法人松本会計事務所</span>
 </div>
@@ -1003,6 +1006,7 @@
         </div>
       </section>
 
+      <!-- 改ページを設定（print-break-before） -->
       <section class="card print-break-before" id="multiAnnualCard">
         <div class="card-header">
           <h2 class="card-title">STEP2-A 暦年贈与シナリオ（毎年コツコツ型）</h2>
