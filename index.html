@@ -36,7 +36,7 @@
     }
     
     /* 印刷用要素（画面では非表示） */
-    .print-only-header {
+    .print-only-header, .print-footer-row {
       display: none;
     }
 
@@ -558,39 +558,20 @@
       text-underline-offset:2px;
     }
 
-    /* ===== チュートリアル関連（スポットライト方式・視認性改善） ===== */
-    /* マスク（クリック用レイヤー） */
+    /* ===== チュートリアル関連 ===== */
     .mk-tour-mask {
-      position: fixed;
-      inset: 0;
-      background: transparent; /* 背景色なし */
-      z-index: 9998;
+      position: fixed; inset: 0; background: transparent; z-index: 9998;
     }
-    
-    /* フォーカスリング（ここ自体に巨大な影をつけて周りを暗くする） */
-    /* 修正：影の色を薄くして可読性向上 */
     .mk-tour-focus {
-      position: fixed;
-      border-radius: 12px;
-      /* 影で周囲を暗くする：透明度を0.65->0.5に緩和 */
-      box-shadow: 
-        0 0 0 9999px rgba(15, 23, 42, 0.5), 
-        0 0 0 4px #fff, 
-        0 0 0 8px rgba(87, 136, 153, 0.6);
-      z-index: 10001;
-      pointer-events: none;
+      position: fixed; border-radius: 12px;
+      box-shadow: 0 0 0 9999px rgba(15, 23, 42, 0.5), 0 0 0 4px #fff, 0 0 0 8px rgba(87, 136, 153, 0.6);
+      z-index: 10001; pointer-events: none;
       transition: transform .25s cubic-bezier(0.25, 1, 0.5, 1), width .25s ease, height .25s ease, left .25s ease, top .25s ease;
     }
-
     .mk-tour-panel {
-      position: fixed;
-      z-index: 10002;
-      max-width: min(560px, 92vw);
-      background: #fff;
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      box-shadow: 0 14px 36px rgba(0,0,0,.25);
-      padding: 16px;
+      position: fixed; z-index: 10002; max-width: min(560px, 92vw);
+      background: #fff; border: 1px solid var(--border); border-radius: 16px;
+      box-shadow: 0 14px 36px rgba(0,0,0,.25); padding: 16px;
       transition: left .25s ease, top .25s ease;
     }
     .mk-tour-head{display:flex;align-items:center;gap:8px;margin-bottom:8px}
@@ -601,16 +582,14 @@
     .mk-tour-actions .tbtn{border-radius:10px;border:1px solid var(--border);background:#fff;padding:8px 14px;font-weight:700;cursor:pointer;font-size:13px}
     .mk-tour-actions .tbtn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
     .mk-tour-actions .tbtn:disabled{opacity:.55;cursor:not-allowed}
-    
-    .mk-tour-elevate {
-      position: relative;
-    }
-
+    .mk-tour-elevate { position: relative; }
     @media(max-width:600px){
       .mk-tour-panel{left:12px;right:12px;max-width:calc(100vw - 24px);}
     }
 
-    /* 印刷設定 - Table Header Hack */
+    /* =========================================
+       印刷設定 (Print CSS) - レポート品質強化
+       ========================================= */
     @media print {
       @page {
         size: A4;
@@ -628,193 +607,136 @@
         padding: 0;
       }
 
-      /* 画面用ヘッダーは非表示 */
-      .app-header { display: none !important; }
-      
-      /* アプリ全体をテーブルとして扱う */
+      /* 画面用ヘッダー・フッター・ボタン類は非表示 */
+      .app-header, .btn-row, .btn-tutorial, .btn-ghost, 
+      .action-buttons, footer.mk-mini, .app-footer,
+      .mk-tour-mask, .mk-tour-focus, .mk-tour-panel,
+      #startTour, #toggleDetailsBtn, #loadSampleBtn,
+      .pill-switch, .radio-chip input:not(:checked) + span,
+      .card-header .badge {
+        display: none !important;
+      }
+
+      /* アプリ全体をテーブルとして扱う (ヘッダー/フッター繰り返し) */
       .app {
         display: table !important;
         width: 100%;
         border-collapse: collapse;
       }
       
-      /* 印刷専用ヘッダーをテーブルヘッダーグループにする */
-      /* これにより、改ページごとに自動的に先頭に挿入される */
+      /* 全ページ共通ヘッダー領域 */
       .print-only-header {
         display: table-header-group !important;
-        height: 25mm; /* ヘッダー領域の高さ確保 */
+        height: 20mm;
       }
       
-      /* ヘッダー内部のスタイル */
+      /* 全ページ共通フッター領域 */
+      .print-footer-row {
+        display: table-footer-group !important;
+        height: 10mm;
+      }
+
+      /* ヘッダーの中身 */
       .print-header-content {
         display: flex;
-        align-items: center;
-        justify-content: flex-start;
-        gap: 16px;
-        height: 20mm;
+        justify-content: space-between;
+        align-items: flex-end;
         border-bottom: 2px solid var(--accent);
-        margin-bottom: 5mm; /* 本文との間隔 */
         padding-bottom: 5px;
+        margin-bottom: 10mm;
+        width: 100%;
+      }
+      .print-logo-section { display: flex; align-items: center; gap: 15px; }
+      .print-logo { height: 40px; width: auto; }
+      .print-company-name { font-size: 16pt; font-weight: 700; color: var(--ink); }
+      .print-report-title { font-size: 11pt; color: var(--muted); }
+
+      /* フッターの中身 */
+      .print-footer-content {
+        border-top: 1px solid #ddd;
+        padding-top: 5px;
+        margin-top: 10mm;
+        text-align: center;
+        font-size: 9pt;
+        color: #666;
+        display: flex;
+        justify-content: space-between;
       }
 
-      .print-logo {
-        height: 40px;
-        width: auto;
-        display: block;
-      }
-      
-      .print-text {
-        font-size: 18px;
-        font-weight: 700;
-        color: #000 !important;
-        display: block;
-      }
-
-      /* メインコンテンツをテーブル行グループにする */
+      /* メインコンテンツ */
       .layout {
         display: table-row-group !important;
       }
-      
-      /* テーブルセルとしての挙動を抑制するためのラッパー的な扱い */
       .layout > * {
         break-inside: avoid;
       }
 
-      /* 不要なUI要素を非表示 */
-      .btn-tutorial, .btn-row, .btn-ghost, .action-buttons, 
-      footer.mk-mini, .mk-tour-mask, .mk-tour-focus, .mk-tour-panel,
-      #startTour, #toggleDetailsBtn, #loadSampleBtn, .pill-switch,
-      .app-footer {
-        display: none !important;
-      }
-
-      /* 強制改ページクラス */
-      .print-break-before {
-        break-before: page;
-        page-break-before: always;
-        margin-top: 20px !important;
-        border-top: none !important;
-        display: block !important; /* テーブルレイアウト内でもブロックとして振る舞わせる */
-      }
-
-      /* カードをレポートのセクション風に整形 */
+      /* コンテンツカードの整形（文書風にする） */
       .card { 
-        box-shadow: none; 
-        border: none; 
-        border-bottom: 2px solid #eee;
-        padding: 10px 0;
-        margin-bottom: 20px; 
-        page-break-inside: avoid; 
-        background: transparent;
-        display: block; /* 明示的にブロック */
+        box-shadow: none; border: none; 
+        border-bottom: 1px solid #eee;
+        padding: 5px 0; margin-bottom: 15px; 
+        page-break-inside: avoid; background: transparent;
+        display: block;
       }
-      .card-header {
-        margin-bottom: 8px;
-        border-bottom: none;
-      }
+      .card-header { margin-bottom: 5px; border-bottom: none; }
       .card-title {
-        font-size: 13pt;
-        color: #000;
+        font-size: 12pt; color: #000;
+        border-left: 4px solid var(--accent); padding-left: 10px;
       }
 
-      /* 結果カードだけ強調 */
-      .result-card {
-        border: 2px solid var(--accent);
-        background: #f9fcff !important;
-        padding: 15px;
-        border-radius: 8px;
-        page-break-inside: avoid;
-        -webkit-print-color-adjust: exact;
-      }
-
-      /* グリッドレイアウトを解除して縦並びに（グラフの重なり防止） */
-      .grid, .grid-2 {
-        display: block !important;
-      }
-      
-      .grid > div {
-        margin-bottom: 40px !important; 
-        page-break-inside: avoid; 
-      }
-
-      /* グラフエリアの高さと余白 */
-      .chart-container {
-        height: 280px !important;
-        width: 100% !important;
-        margin-bottom: 20px !important;
-        position: relative !important;
+      /* 入力フォームを「テキスト」として見せる */
+      .field {
+        flex-direction: row; align-items: center; justify-content: space-between;
+        border-bottom: 1px dotted #ccc; padding: 4px 0;
         page-break-inside: avoid;
       }
-      
-      canvas {
-        width: 100% !important;
-        height: 100% !important;
-      }
+      .field label { color: #444; font-weight: normal; font-size: 10pt; }
+      .field small { display: none !important; } /* 注釈は消す */
 
-      /* 入力フォームのテキスト化 */
       input[type="number"], input[type="text"], select {
-        border: none;
-        background: transparent;
-        padding: 0;
-        text-align: right;
-        width: auto;
-        font-weight: bold;
-        color: #000;
-        font-size: 11pt;
-        -webkit-appearance: none;
-        appearance: none;
+        border: none; background: transparent;
+        padding: 0; text-align: right; width: auto;
+        font-weight: bold; color: #000; font-size: 11pt;
+        -webkit-appearance: none; appearance: none;
       }
       ::placeholder { color: transparent; }
       
-      /* フィールドラベル */
-      .field label {
-        color: #444;
-        font-size: 10pt;
+      /* ラジオボタンの表示調整 */
+      .radio-row { gap: 15px; justify-content: flex-end; }
+      .radio-chip { padding: 0; border: none; }
+      .radio-chip input:checked + span { color: #000; font-weight: bold; font-size: 11pt; }
+      .radio-chip span::before { display: none; }
+
+      /* 結果カードの強調 */
+      .result-card {
+        border: 2px solid var(--accent) !important;
+        background: #fdfdfd !important;
+        padding: 15px; margin-top: 20px;
+        border-radius: 8px; page-break-inside: avoid;
       }
+      .metric { background: transparent; border: none; border-bottom: 1px solid #eee; padding: 5px 0; }
+      .metric-featured { background: #f0f8fa !important; border: 1px solid var(--accent); padding: 10px; }
+      .metric-value { font-size: 16pt; }
+
+      /* グラフエリア */
+      .grid, .grid-2, .grid-3 { display: block !important; }
+      .grid > div { margin-bottom: 10px; page-break-inside: avoid; }
       
-      /* 選択肢の表示調整 */
-      .radio-row { gap: 5px; }
-      .radio-chip { 
-        border: 1px solid #ddd; 
-        padding: 4px 8px;
-        font-size: 9pt;
-        color: #999;
+      .chart-container {
+        height: 250px !important; width: 80% !important;
+        margin: 10px auto !important; position: relative !important;
+        page-break-inside: avoid;
       }
-      .radio-chip input:checked + span {
-        color: #000;
-        font-weight: bold;
-      }
-      .radio-chip input:checked + span::before {
-        background: #000;
-        border-color: #000;
-      }
+      canvas { width: 100% !important; height: 100% !important; }
 
       /* 詳細テーブル */
-      #detailsArea { 
-        display: block !important; 
-        overflow: visible !important; 
-        margin-top: 30px !important;
-      }
+      #detailsArea { display: block !important; margin-top: 20px !important; }
+      .detail-table th { background: #eee !important; color: #000; border: 1px solid #000; position: static !important; }
+      .detail-table td { border: 1px solid #000; color: #000; }
       
-      .detail-table { font-size: 9pt; }
-      .detail-table th, .detail-table td {
-        border: 1px solid #000;
-        color: #000;
-      }
-      .detail-table th { 
-        background: #eee !important; 
-        position: static !important; 
-      }
-      .detail-table th[style*="background:#f0f8fa"], 
-      .detail-table td[style*="background:#f0f8fa"] {
-        background-color: #f0f8fa !important;
-        -webkit-print-color-adjust: exact;
-      }
-      .detail-table th[style*="background:#fff3f3"], 
-      .detail-table td[style*="background:#fff3f3"] {
-        background-color: #fff3f3 !important;
-        -webkit-print-color-adjust: exact;
-      }
+      /* 強制改ページ */
+      .print-break-before { break-before: page; page-break-before: always; display: block !important; }
     }
   </style>
 </head>
@@ -826,8 +748,11 @@
   <!-- 印刷用ヘッダー（Table Headerとして機能） -->
   <div class="print-only-header">
     <div class="print-header-content">
-      <img src="./logo.jpg" alt="ロゴ" class="print-logo">
-      <span class="print-text">税理士法人松本会計事務所</span>
+      <div class="print-logo-section">
+        <img src="./logo.jpg" alt="Logo" class="print-logo">
+        <span class="print-company-name">税理士法人松本会計事務所</span>
+      </div>
+      <div class="print-report-title">贈与税試算シミュレーションレポート</div>
     </div>
   </div>
 
@@ -1109,7 +1034,7 @@
         </div>
       </section>
 
-      <section class="card result-card hidden" id="multiResultCard">
+      <section class="card result-card hidden print-break-before" id="multiResultCard">
         <div class="card-header">
           <h2 class="card-title">STEP3 長期シミュレーション結果（概算）</h2>
         </div>
@@ -1243,6 +1168,14 @@
     <a href="/tool-portal/terms.html" target="_blank" rel="noopener">利用条件</a> ｜ 
     <span id="build-rev">Rev.24</span>（<span id="last-updated-date"></span>）
   </footer>
+
+  <!-- 印刷用フッター (全ページ下部に表示) -->
+  <div class="print-footer-row">
+    <div class="print-footer-content">
+      <span>税理士法人松本会計事務所 - 公式シミュレーションレポート</span>
+      <span>Confidential</span>
+    </div>
+  </div>
 </div>
 
 <script>
