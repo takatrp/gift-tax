@@ -612,12 +612,13 @@
 
     /* 印刷設定 */
     @media print {
-      /* ページ全体の設定 */
+      /* ページ全体の設定: ヘッダー用の余白(margin-top)をさらに大きく確保 */
       @page {
-        size: auto;
-        /* ヘッダー表示領域を確保するためにマージンを設定 */
-        /* 本文開始位置を20mm下げる */
-        margin: 20mm 15mm 15mm 15mm;
+        size: A4;
+        margin-top: 30mm; /* 本文開始位置を30mm下げる */
+        margin-bottom: 15mm;
+        margin-left: 15mm;
+        margin-right: 15mm;
       }
 
       body {
@@ -647,8 +648,8 @@
         display: none !important;
       }
 
-      /* 印刷用ヘッダー：固定配置 */
-      /* top: 0, left: 0 で用紙の左上に配置される（Chromeの場合） */
+      /* 印刷用ヘッダー：固定配置でマージン領域（マイナスtop）に表示させる */
+      /* top位置を調整し、確保した30mmのマージンエリア内に配置 */
       .print-only-header {
         display: flex !important;
         align-items: center;
@@ -657,18 +658,17 @@
         
         /* 固定配置設定 */
         position: fixed;
-        top: 0; 
+        top: -25mm; /* マージン領域の上部に配置 */
         left: 0;
         width: 100%;
-        height: 18mm; /* 余白20mmより少し小さく */
+        height: 20mm;
         
         /* デザイン */
         border-bottom: 2px solid var(--accent);
         background-color: #fff !important;
-        z-index: 99999; /* 最前面に表示 */
+        z-index: 99999;
         padding-bottom: 5px;
         
-        /* コンテンツに被らないよう背景を不透明に */
         -webkit-print-color-adjust: exact;
         print-color-adjust: exact;
       }
@@ -683,7 +683,7 @@
       .print-text {
         font-size: 18px;
         font-weight: 700;
-        color: #000 !important; /* 完全な黒を指定 */
+        color: #000 !important;
         display: block;
       }
 
@@ -691,8 +691,8 @@
       .print-break-before {
         break-before: page;
         page-break-before: always;
-        margin-top: 30px !important; /* 改ページ後の余白 */
-        padding-top: 10px;
+        margin-top: 0 !important;
+        padding-top: 20px !important;
         border-top: none !important;
       }
 
@@ -788,11 +788,18 @@
         border-color: #000;
       }
 
-      /* 詳細テーブル */
+      /* 詳細テーブル: display:blockにして改ページを効かせる */
       #detailsArea { 
         display: block !important; 
         overflow: visible !important; 
       }
+      
+      /* 改ページ強制用のクラス適用 */
+      #detailsArea.print-break-before {
+        break-before: page;
+        page-break-before: always;
+      }
+
       .detail-table { font-size: 9pt; }
       .detail-table th, .detail-table td {
         border: 1px solid #000;
