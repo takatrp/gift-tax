@@ -615,14 +615,25 @@
       body {
         background: #fff;
         color: #000;
+        font-size: 12pt;
         -webkit-print-color-adjust: exact;
         print-color-adjust: exact;
+        line-height: 1.5;
       }
-      .app-header, .btn-tutorial, .btn-row, .btn-ghost, .action-buttons, footer.mk-mini,
-      .mk-tour-mask, .mk-tour-focus, .mk-tour-panel {
+      /* コンテンツの開始位置調整（ヘッダー被り防止） */
+      .app {
+        padding-top: 70px; 
+      }
+      .layout { padding: 0; max-width: 100%; }
+
+      /* 不要なUI要素を非表示 */
+      .app-header, .btn-tutorial, .btn-row, .btn-ghost, .action-buttons, 
+      footer.mk-mini, .mk-tour-mask, .mk-tour-focus, .mk-tour-panel,
+      #startTour, #toggleDetailsBtn, #loadSampleBtn, .pill-switch,
+      .app-footer {
         display: none !important;
       }
-      
+
       /* 印刷用ヘッダーを表示（各ページ上部に固定） */
       .print-only-header {
         display: flex !important;
@@ -649,19 +660,98 @@
         color: var(--ink);
       }
 
-      /* コンテンツの開始位置調整（ヘッダー被り防止） */
-      .app {
-        padding-top: 70px; 
+      /* カードをレポートのセクション風に整形 */
+      .card { 
+        box-shadow: none; 
+        border: none; 
+        border-bottom: 2px solid #eee;
+        padding: 10px 0;
+        margin-bottom: 20px; 
+        page-break-inside: avoid; 
+      }
+      .card-header {
+        margin-bottom: 10px;
+        border-bottom: none;
+      }
+      .card-title {
+        font-size: 14pt;
+        color: #000;
+      }
+
+      /* 結果カードだけ強調 */
+      .result-card {
+        border: 2px solid var(--accent);
+        background: #f9fcff;
+        padding: 15px;
+        border-radius: 8px;
+        page-break-inside: avoid;
+      }
+
+      /* 入力フォームのテキスト化 */
+      input[type="number"], input[type="text"], select {
+        border: none;
+        background: transparent;
+        padding: 0;
+        text-align: right;
+        width: auto;
+        font-weight: bold;
+        color: #000;
+        font-size: 12pt;
+      }
+      ::placeholder { color: transparent; }
+      
+      /* フィールドラベル */
+      .field label {
+        color: #444;
+        font-size: 10pt;
       }
       
-      .layout { padding: 0; max-width: 100%; }
-      .card { box-shadow: none; border: 1px solid #ccc; margin-bottom: 20px; page-break-inside: avoid; }
+      /* 選択肢の表示調整（簡易的） */
+      .radio-row { gap: 5px; }
+      .radio-chip { 
+        border: 1px solid #ddd; 
+        padding: 4px 8px;
+        font-size: 9pt;
+        color: #999;
+      }
+      /* 選択されているものだけ強調 */
+      .radio-chip input:checked + span {
+        color: #000;
+        font-weight: bold;
+      }
+      .radio-chip input:checked + span::before {
+        background: #000;
+        border-color: #000;
+      }
+
+      /* グラフエリア */
+      .chart-container {
+        height: 300px;
+        page-break-inside: avoid;
+      }
+
+      /* 詳細テーブル */
       #detailsArea { display: block !important; overflow: visible !important; }
-      .detail-table th { position: static !important; }
-      input, select { border: none; background: transparent; padding: 0; text-align: right; width: auto; }
-      .pill-switch, .radio-row { border: none; background: none; }
-      .radio-chip { border: 1px solid #ccc; }
-      .radio-chip input:checked + span::before { background: #000; }
+      .detail-table { font-size: 9pt; }
+      .detail-table th, .detail-table td {
+        border: 1px solid #000;
+        color: #000;
+      }
+      .detail-table th { 
+        background: #eee !important; 
+        position: static !important; 
+      }
+      /* テーブル背景色の印刷対応 */
+      .detail-table th[style*="background:#f0f8fa"], 
+      .detail-table td[style*="background:#f0f8fa"] {
+        background-color: #f0f8fa !important;
+        -webkit-print-color-adjust: exact;
+      }
+      .detail-table th[style*="background:#fff3f3"], 
+      .detail-table td[style*="background:#fff3f3"] {
+        background-color: #fff3f3 !important;
+        -webkit-print-color-adjust: exact;
+      }
     }
   </style>
 </head>
