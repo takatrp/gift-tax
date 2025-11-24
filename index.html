@@ -35,8 +35,8 @@
       --btn-outline-border: #4a7d8f;
     }
     
-    /* 印刷用要素（画面では非表示） */
-    .print-only-header, .print-footer-row {
+    /* 印刷用固定要素（画面では非表示） */
+    .print-header-fixed, .print-footer-fixed {
       display: none;
     }
 
@@ -558,20 +558,37 @@
       text-underline-offset:2px;
     }
 
-    /* ===== チュートリアル関連 ===== */
+    /* ===== チュートリアル関連（スポットライト方式・視認性改善） ===== */
+    /* マスク（クリック用レイヤー） */
     .mk-tour-mask {
-      position: fixed; inset: 0; background: transparent; z-index: 9998;
+      position: fixed;
+      inset: 0;
+      background: transparent; /* 背景色なし */
+      z-index: 9998;
     }
+    
+    /* フォーカスリング */
     .mk-tour-focus {
-      position: fixed; border-radius: 12px;
-      box-shadow: 0 0 0 9999px rgba(15, 23, 42, 0.5), 0 0 0 4px #fff, 0 0 0 8px rgba(87, 136, 153, 0.6);
-      z-index: 10001; pointer-events: none;
+      position: fixed;
+      border-radius: 12px;
+      box-shadow: 
+        0 0 0 9999px rgba(15, 23, 42, 0.5), 
+        0 0 0 4px #fff, 
+        0 0 0 8px rgba(87, 136, 153, 0.6);
+      z-index: 10001;
+      pointer-events: none;
       transition: transform .25s cubic-bezier(0.25, 1, 0.5, 1), width .25s ease, height .25s ease, left .25s ease, top .25s ease;
     }
+
     .mk-tour-panel {
-      position: fixed; z-index: 10002; max-width: min(560px, 92vw);
-      background: #fff; border: 1px solid var(--border); border-radius: 16px;
-      box-shadow: 0 14px 36px rgba(0,0,0,.25); padding: 16px;
+      position: fixed;
+      z-index: 10002;
+      max-width: min(560px, 92vw);
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      box-shadow: 0 14px 36px rgba(0,0,0,.25);
+      padding: 16px;
       transition: left .25s ease, top .25s ease;
     }
     .mk-tour-head{display:flex;align-items:center;gap:8px;margin-bottom:8px}
@@ -582,180 +599,267 @@
     .mk-tour-actions .tbtn{border-radius:10px;border:1px solid var(--border);background:#fff;padding:8px 14px;font-weight:700;cursor:pointer;font-size:13px}
     .mk-tour-actions .tbtn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
     .mk-tour-actions .tbtn:disabled{opacity:.55;cursor:not-allowed}
-    .mk-tour-elevate { position: relative; }
+    
+    .mk-tour-elevate {
+      position: relative;
+    }
+
     @media(max-width:600px){
       .mk-tour-panel{left:12px;right:12px;max-width:calc(100vw - 24px);}
     }
 
     /* =========================================
-       印刷設定 (Print CSS) - レポート品質強化
+       印刷設定 (Print CSS) - 全ページ固定ヘッダー/フッター対応
        ========================================= */
     @media print {
+      /* 【重要】余白設定
+         ヘッダー・フッター用のスペースをページ余白として確保します。
+         position: fixed はこの「印刷可能領域」の端を基準に配置されます。
+      */
       @page {
         size: A4;
-        margin: 15mm;
+        margin-top: 25mm;    /* ヘッダー領域 */
+        margin-bottom: 20mm; /* フッター領域 */
+        margin-left: 15mm;
+        margin-right: 15mm;
+      }
+
+      /* 【重要】高さ100%制限の解除
+         これが残っているとブラウザが「1ページしかない」と誤認して
+         2ページ目以降のヘッダーが消える原因になります。
+      */
+      html, body, .app {
+        height: auto !important;
+        overflow: visible !important;
+        display: block !important;
       }
 
       body {
-        background: #fff;
-        color: #000;
-        font-size: 11pt;
+        background: #fff !important;
+        color: #000 !important;
+        font-size: 10.5pt;
         -webkit-print-color-adjust: exact;
         print-color-adjust: exact;
-        line-height: 1.5;
-        margin: 0;
-        padding: 0;
       }
 
-      /* 画面用ヘッダー・フッター・ボタン類は非表示 */
+      /* 画面用の要素を非表示 */
       .app-header, .btn-row, .btn-tutorial, .btn-ghost, 
-      .action-buttons, footer.mk-mini, .app-footer,
+      .action-buttons, .pill-switch, 
+      #startTour, #toggleDetailsBtn, #loadSampleBtn, 
       .mk-tour-mask, .mk-tour-focus, .mk-tour-panel,
-      #startTour, #toggleDetailsBtn, #loadSampleBtn,
-      .pill-switch, .radio-chip input:not(:checked) + span,
-      .card-header .badge {
+      footer.mk-mini, .app-footer {
         display: none !important;
       }
 
-      /* アプリ全体をテーブルとして扱う (ヘッダー/フッター繰り返し) */
-      .app {
-        display: table !important;
-        width: 100%;
-        border-collapse: collapse;
-      }
-      
-      /* 全ページ共通ヘッダー領域 */
-      .print-only-header {
-        display: table-header-group !important;
-        height: 20mm;
-      }
-      
-      /* 全ページ共通フッター領域 */
-      .print-footer-row {
-        display: table-footer-group !important;
-        height: 10mm;
-      }
-
-      /* ヘッダーの中身 */
-      .print-header-content {
-        display: flex;
-        justify-content: space-between;
+      /* 【固定ヘッダー】
+         position: fixed で全ページの定位置（上部）に強制表示 
+      */
+      .print-header-fixed {
+        display: flex !important;
+        position: fixed;
+        top: -15mm; /* マージン領域に食い込ませる */
+        left: 0;
+        right: 0;
+        height: 15mm;
         align-items: flex-end;
         border-bottom: 2px solid var(--accent);
         padding-bottom: 5px;
-        margin-bottom: 10mm;
-        width: 100%;
+        justify-content: space-between;
+        background: #fff; /* 背景白で透過防止 */
+        z-index: 9999;
       }
-      .print-logo-section { display: flex; align-items: center; gap: 15px; }
-      .print-logo { height: 40px; width: auto; }
-      .print-company-name { font-size: 16pt; font-weight: 700; color: var(--ink); }
-      .print-report-title { font-size: 11pt; color: var(--muted); }
 
-      /* フッターの中身 */
-      .print-footer-content {
+      /* 【固定フッター】
+         position: fixed で全ページの定位置（下部）に強制表示 
+      */
+      .print-footer-fixed {
+        display: flex !important;
+        position: fixed;
+        bottom: -10mm; /* マージン領域に食い込ませる */
+        left: 0;
+        right: 0;
+        height: 10mm;
         border-top: 1px solid #ddd;
         padding-top: 5px;
-        margin-top: 10mm;
-        text-align: center;
+        justify-content: space-between;
         font-size: 9pt;
         color: #666;
-        display: flex;
-        justify-content: space-between;
+        background: #fff;
+        z-index: 9999;
+        align-items: center;
       }
+
+      .print-logo-section { display: flex; align-items: center; gap: 15px; }
+      .print-logo { height: 35px; width: auto; }
+      .print-company-name { font-size: 14pt; font-weight: 700; color: var(--ink); }
+      .print-report-title { font-size: 10pt; color: var(--muted); }
 
       /* メインコンテンツ */
       .layout {
-        display: table-row-group !important;
-      }
-      .layout > * {
-        break-inside: avoid;
+        display: block !important;
+        width: 100%;
+        padding: 0;
       }
 
       /* コンテンツカードの整形（文書風にする） */
-      .card { 
-        box-shadow: none; border: none; 
+      .card {
+        box-shadow: none;
+        border: none;
         border-bottom: 1px solid #eee;
-        padding: 5px 0; margin-bottom: 15px; 
-        page-break-inside: avoid; background: transparent;
-        display: block;
+        padding: 5px 0;
+        margin-bottom: 15px;
+        break-inside: avoid; /* カード途中での改ページ禁止 */
+        page-break-inside: avoid;
+        background: transparent;
       }
-      .card-header { margin-bottom: 5px; border-bottom: none; }
+      .card-header {
+        margin-bottom: 5px;
+        border-bottom: none;
+      }
       .card-title {
-        font-size: 12pt; color: #000;
-        border-left: 4px solid var(--accent); padding-left: 10px;
+        font-size: 12pt;
+        color: #000;
+        border-left: 4px solid var(--accent);
+        padding-left: 10px;
       }
-
+      /* 補足説明（smallタグ）は印刷時はノイズになるので隠す */
+      .field small, .note-card {
+        display: none !important;
+      }
+      .badge { display: none !important; }
+      
       /* 入力フォームを「テキスト」として見せる */
       .field {
-        flex-direction: row; align-items: center; justify-content: space-between;
-        border-bottom: 1px dotted #ccc; padding: 4px 0;
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+        border-bottom: 1px dotted #ccc;
+        padding: 4px 0;
         page-break-inside: avoid;
       }
-      .field label { color: #444; font-weight: normal; font-size: 10pt; }
-      .field small { display: none !important; } /* 注釈は消す */
-
-      input[type="number"], input[type="text"], select {
-        border: none; background: transparent;
-        padding: 0; text-align: right; width: auto;
-        font-weight: bold; color: #000; font-size: 11pt;
-        -webkit-appearance: none; appearance: none;
+      .field label {
+        color: #444;
+        font-weight: normal;
+        font-size: 10pt;
       }
-      ::placeholder { color: transparent; }
-      
-      /* ラジオボタンの表示調整 */
-      .radio-row { gap: 15px; justify-content: flex-end; }
-      .radio-chip { padding: 0; border: none; }
-      .radio-chip input:checked + span { color: #000; font-weight: bold; font-size: 11pt; }
+      input[type="number"], input[type="text"], select {
+        border: none;
+        background: transparent;
+        text-align: right;
+        font-weight: bold;
+        color: #000;
+        width: auto;
+        padding: 0;
+        font-size: 11pt;
+        -webkit-appearance: none;
+        appearance: none; /* ▼などのアイコンを消す */
+      }
+      input::placeholder { color: transparent; }
+
+      /* グリッドレイアウト調整 */
+      .grid, .grid-2, .grid-3 {
+        display: block !important;
+      }
+      .grid > div, .grid-2 > div {
+        margin-bottom: 5px;
+        page-break-inside: avoid;
+      }
+
+      /* 選択肢（ラジオボタン）の表示調整 */
+      .radio-row {
+        gap: 15px;
+        justify-content: flex-end;
+      }
+      .radio-chip {
+        padding: 0;
+        border: none;
+      }
+      /* 非選択項目は薄く、あるいは隠す */
+      .radio-chip input:not(:checked) + span {
+        display: none;
+      }
+      .radio-chip input:checked + span {
+        color: #000;
+        font-weight: bold;
+        font-size: 11pt;
+      }
       .radio-chip span::before { display: none; }
 
       /* 結果カードの強調 */
       .result-card {
-        border: 2px solid var(--accent) !important;
         background: #fdfdfd !important;
-        padding: 15px; margin-top: 20px;
-        border-radius: 8px; page-break-inside: avoid;
+        border: 2px solid var(--accent) !important;
+        border-radius: 8px;
+        padding: 15px;
+        margin-top: 20px;
+        break-inside: avoid;
       }
-      .metric { background: transparent; border: none; border-bottom: 1px solid #eee; padding: 5px 0; }
-      .metric-featured { background: #f0f8fa !important; border: 1px solid var(--accent); padding: 10px; }
-      .metric-value { font-size: 16pt; }
-
-      /* グラフエリア */
-      .grid, .grid-2, .grid-3 { display: block !important; }
-      .grid > div { margin-bottom: 10px; page-break-inside: avoid; }
+      .metric {
+        background: transparent;
+        border: none;
+        padding: 5px 0;
+        border-bottom: 1px solid #eee;
+      }
+      .metric-featured {
+        background: #f0f8fa !important;
+        border: 1px solid var(--accent);
+        padding: 15px;
+      }
       
+      /* グラフエリア調整 */
       .chart-container {
-        height: 250px !important; width: 80% !important;
-        margin: 10px auto !important; position: relative !important;
+        height: 250px !important;
+        width: 80% !important;
+        margin: 20px auto !important;
         page-break-inside: avoid;
       }
       canvas { width: 100% !important; height: 100% !important; }
 
       /* 詳細テーブル */
-      #detailsArea { display: block !important; margin-top: 20px !important; }
-      .detail-table th { background: #eee !important; color: #000; border: 1px solid #000; position: static !important; }
-      .detail-table td { border: 1px solid #000; color: #000; }
-      
-      /* 強制改ページ */
-      .print-break-before { break-before: page; page-break-before: always; display: block !important; }
+      #detailsArea {
+        display: block !important;
+        break-before: page; /* テーブル前で改ページ */
+        margin-top: 20px !important;
+      }
+      .detail-table th {
+        background: #eee !important;
+        color: #000;
+        border: 1px solid #000;
+      }
+      .detail-table td {
+        border: 1px solid #000;
+        color: #000;
+      }
+
+      /* 改ページ制御 */
+      .print-break-before {
+        break-before: page;
+        page-break-before: always;
+        margin-top: 30px !important;
+        display: block !important;
+      }
     }
   </style>
 </head>
 <body>
 
-<!-- 印刷時はアプリ全体をテーブルとして扱う -->
+<!-- 印刷用 固定ヘッダー (全ページに強制表示) -->
+<div class="print-header-fixed">
+  <div class="print-logo-section">
+    <img src="./logo.jpg" alt="Logo" class="print-logo">
+    <span class="print-company-name">税理士法人松本会計事務所</span>
+  </div>
+  <div class="print-report-title">贈与税試算シミュレーションレポート</div>
+</div>
+
+<!-- 印刷用 固定フッター (全ページに強制表示) -->
+<div class="print-footer-fixed">
+  <span>税理士法人松本会計事務所 - 公式シミュレーションレポート</span>
+  <span>Confidential</span>
+</div>
+
 <div class="app">
   
-  <!-- 印刷用ヘッダー（Table Headerとして機能） -->
-  <div class="print-only-header">
-    <div class="print-header-content">
-      <div class="print-logo-section">
-        <img src="./logo.jpg" alt="Logo" class="print-logo">
-        <span class="print-company-name">税理士法人松本会計事務所</span>
-      </div>
-      <div class="print-report-title">贈与税試算シミュレーションレポート</div>
-    </div>
-  </div>
-
   <!-- 画面表示用ヘッダー -->
   <header class="app-header">
     <div class="header-bar">
@@ -770,7 +874,7 @@
     </div>
   </header>
 
-  <!-- メインコンテンツ（Table Bodyとして機能） -->
+  <!-- メインコンテンツ -->
   <main class="layout">
 
     <!-- モードタブ切替 -->
@@ -797,7 +901,7 @@
       </div>
     </section>
 
-    <!-- 単年試算エリア（既存ロジック） -->
+    <!-- 単年試算エリア -->
     <div id="singleModeArea">
       <section class="card">
         <div class="card-header">
@@ -887,7 +991,6 @@
             <div class="field">
               <label>今年 1年間の贈与額（特定贈与者 1人分）</label>
               <input type="text" inputmode="numeric" id="seisanAmount" placeholder="例）5,000,000" class="yen-input" />
-              <!-- 修正: 注意書きを強化 -->
               <small>※父・母など、精算課税を選択した「特定の贈与者1名」からの贈与額を入力してください。複数人から受けている場合は個別に計算が必要です。</small>
             </div>
             <div class="field">
@@ -1062,7 +1165,7 @@
               <div class="metric-value" id="multiSeisanFinalEstate">- 円</div>
               <div class="metric-sub">贈与後・運用後に残る相続財産（概算）</div>
             </div>
-            <div class="metric metric-featured">
+            <div class="metric metric-featured" style="grid-column: 1 / -1;">
               <div class="metric-label">税負担の差額（暦年 − 精算）</div>
               <div class="metric-value" id="multiTaxDiff">- 円</div>
               <div id="multiTaxAdvantage" style="font-weight:900; font-size:18px; margin-top:4px; color:var(--accent);"></div>
@@ -1071,8 +1174,7 @@
           </div>
 
           <!-- グラフ描画エリア -->
-          <!-- クラスを追加して改ページ制御 -->
-          <div class="print-break-before" style="display:flex; align-items:center; justify-content:space-between; margin:24px 0 12px; flex-wrap:wrap; gap:10px;">
+          <div style="display:flex; align-items:center; justify-content:space-between; margin:24px 0 12px; flex-wrap:wrap; gap:10px;">
             <h3 style="margin:0; font-size:16px; font-weight:700; color:var(--accent-dark);">
               シミュレーション結果の可視化
             </h3>
@@ -1100,8 +1202,7 @@
             </div>
           </div>
 
-          <!-- 詳細データテーブル（初期非表示） -->
-          <!-- ここにも改ページ制御を追加 -->
+          <!-- 詳細データテーブル -->
           <div id="detailsArea" class="hidden print-break-before" style="margin-top:16px; overflow-x:auto; border-top:1px dashed var(--border); padding-top:16px;">
             <div style="font-size:14px; font-weight:700; margin-bottom:8px; color:var(--accent-dark);">▼ 年次シミュレーション詳細</div>
             <table class="detail-table" id="detailsTable">
@@ -1136,11 +1237,10 @@
       </div>
       <div class="card-body">
         <ul>
-          <li>本ツールは、令和7年4月1日現在の国税庁タックスアンサー（No.4408「贈与税の計算と税率（暦年課税）」、No.4103「相続時精算課税の選択」など）に基づき、贈与税額を概算するためのものです。</li>
-          <li>土地・建物、有価証券の評価、各種非課税枠（配偶者控除、住宅取得資金の非課税、教育資金一括贈与 等）、特例税率の適用判定、相続税への生前贈与加算の詳細（7年加算・経過措置・100万円控除 等）については、本ツールでは簡略化しており、別途の検討が必要です。</li>
+          <li>本ツールは、令和7年4月1日現在の国税庁タックスアンサーに基づき、贈与税額を概算するためのものです。</li>
+          <li>土地・建物、有価証券の評価、各種非課税枠、特例税率の適用判定、相続税への生前贈与加算の詳細については、本ツールでは簡略化しており、別途の検討が必要です。</li>
           <li>相続時精算課税については、令和6年1月1日以後の贈与に創設された年110万円の基礎控除と、累計2,500万円の特別控除を前提としています。</li>
           <li>長期シミュレーションの暦年贈与における相続財産への加算期間は、経過措置を考慮せず一律「相続前7年間」として概算しています。</li>
-          <li>長期シミュレーションでは、贈与後の最終的な財産額（持ち戻し額を含む）に基づき、法定相続人が法定相続分通りに遺産を取得したと仮定して相続税額を計算しています。配偶者の有無や特例の適用等は考慮していないため、あくまで概算の目安としてご利用ください。</li>
         </ul>
         <div class="note-highlight">
           本ツールは税額の「概算」を把握することを目的としたものであり、申告書作成や申告是非の判断を直接行うものではありません。実務では、贈与の内容・時期・受贈者・贈与者の関係などを総合的に確認する必要があります。実際の贈与の実行・申告にあたっては、松本会計のスタッフにご相談ください。
@@ -1161,6 +1261,7 @@
 
   </main>
 
+  <!-- 元のフッターを復元 -->
   <footer class="mk-mini">
     © <span id="cpy-year">2025</span>
     <a href="https://www.matsumoto-kaikei.or.jp/" target="_blank" rel="noopener license">税理士法人松本会計事務所</a> ｜ 
@@ -1168,14 +1269,6 @@
     <a href="/tool-portal/terms.html" target="_blank" rel="noopener">利用条件</a> ｜ 
     <span id="build-rev">Rev.24</span>（<span id="last-updated-date"></span>）
   </footer>
-
-  <!-- 印刷用フッター (全ページ下部に表示) -->
-  <div class="print-footer-row">
-    <div class="print-footer-content">
-      <span>税理士法人松本会計事務所 - 公式シミュレーションレポート</span>
-      <span>Confidential</span>
-    </div>
-  </div>
 </div>
 
 <script>
@@ -1201,8 +1294,8 @@
   })();
 
   // 定数
-  const BASE_DEDUCTION = 1100000; // 暦年課税・相続時精算課税 共通の基礎控除額（110万円）
-  const SEISAN_SPECIAL_LIMIT = 25000000; // 相続時精算課税の特別控除限度額（2,500万円）
+  const BASE_DEDUCTION = 1100000; 
+  const SEISAN_SPECIAL_LIMIT = 25000000; 
 
   // 速算表
   const GENERAL_BRACKETS = [
@@ -1227,7 +1320,7 @@
     { upTo: Infinity, rate: 0.55, deduction: 6400000 }
   ];
 
-  // 相続税速算表（平成27年1月1日以後）
+  // 相続税速算表
   const INHERITANCE_TAX_BRACKETS = [
     { upTo: 10000000, rate: 0.10, deduction: 0 },
     { upTo: 30000000, rate: 0.15, deduction: 500000 },
@@ -1236,7 +1329,7 @@
     { upTo: 200000000, rate: 0.40, deduction: 17000000 },
     { upTo: 300000000, rate: 0.50, deduction: 42000000 },
     { upTo: 600000000, rate: 0.55, deduction: 72000000 },
-    { upTo: Infinity, rate: 0.55, deduction: 72000000 } // 上限なしだが計算上必要
+    { upTo: Infinity, rate: 0.55, deduction: 72000000 }
   ];
 
   // DOM取得（単年タブ）
@@ -1325,7 +1418,6 @@
   // 全ての金額入力欄（カンマ整形）
   const yenInputs = document.querySelectorAll('.yen-input');
 
-  // リアルタイムカンマ表示ロジック（修正：IME対応強化）
   yenInputs.forEach(input => {
     let isComposing = false;
     input.addEventListener('compositionstart', () => { isComposing = true; });
@@ -1335,7 +1427,7 @@
     });
 
     input.addEventListener('input', function(){
-      if(isComposing) return; // 変換中は処理しない
+      if(isComposing) return;
       const cursor = this.selectionStart;
       const val = this.value;
       const digitsBeforeCursor = (val.slice(0, cursor).match(/[0-9]/g) || []).length;
@@ -1381,7 +1473,6 @@
     return Math.floor(n / 100) * 100;
   }
 
-  // 課税価格の千円未満切捨て
   function truncateToThousand(n){
     if(!Number.isFinite(n) || n <= 0) return 0;
     return Math.floor(n / 1000) * 1000;
@@ -1402,17 +1493,14 @@
     return Number.isFinite(n) ? n : defaultValue;
   }
 
-  // 新しい相続税計算関数
   function calcInheritanceTaxAmount(estateTotal, heirsCount) {
     if (estateTotal <= 0 || heirsCount <= 0) return 0;
     const deduction = 30000000 + 6000000 * heirsCount;
     const taxable = Math.max(0, estateTotal - deduction);
     if (taxable <= 0) return 0;
     
-    // 法定相続分で按分（全員均等と仮定）
     const share = Math.floor(taxable / heirsCount);
     
-    // 速算表から計算
     const bracket = INHERITANCE_TAX_BRACKETS.find(b => share <= b.upTo) || INHERITANCE_TAX_BRACKETS[INHERITANCE_TAX_BRACKETS.length-1];
     const taxPerHeir = share * bracket.rate - bracket.deduction;
     
@@ -1421,7 +1509,6 @@
 
   // ===== チュートリアル =====
   const TOUR_KEY = 'gift_tax_tour_dismissed_v1';
-  // STEP5, STEP6（結果表示）は削除
   const steps = [
     {
       sel: '.brand',
@@ -1460,21 +1547,9 @@
     return new Promise(resolve => {
       if(!el){ resolve(); return; }
       let done = false;
-      const timer = setTimeout(() => {
-        if(done) return;
-        done = true;
-        resolve();
-      }, 350);
-      const finish = () => {
-        if(done) return;
-        done = true;
-        clearTimeout(timer);
-        resolve();
-      };
-      const onEnd = () => {
-        window.removeEventListener('scrollend', onEnd);
-        finish();
-      };
+      const timer = setTimeout(() => { if(done) return; done = true; resolve(); }, 350);
+      const finish = () => { if(done) return; done = true; clearTimeout(timer); resolve(); };
+      const onEnd = () => { window.removeEventListener('scrollend', onEnd); finish(); };
       window.addEventListener('scrollend', onEnd, { once:true });
       el.scrollIntoView({ block:'center', behavior:'smooth' });
       requestAnimationFrame(() => requestAnimationFrame(() => {}));
@@ -1498,8 +1573,6 @@
 
   function placeFocus(){
     if(!panelEl || !focusEl) return;
-    
-    // 修正: チュートリアル非表示なら何もしない
     if(panelEl.style.display === 'none') return;
 
     const step = steps[tourIndex];
@@ -1601,16 +1674,13 @@
         endTour();
       }
     });
-    // キーボード操作の修正
     document.addEventListener('keydown', function(e){
-      // パネルが表示されていない時は無視
       if(!panelEl || panelEl.style.display === 'none') return;
-      
       if(e.key === 'Escape'){
         endTour();
         e.preventDefault();
       }else if(e.key === 'ArrowRight' || e.key === 'Enter'){
-        e.preventDefault(); // ボタンフォーカス時の重複発火防止
+        e.preventDefault();
         nextBtn.click();
       }else if(e.key === 'ArrowLeft'){
         e.preventDefault();
@@ -1628,17 +1698,8 @@
     window.addEventListener('orientationchange', () => setTimeout(placeFocus, 100));
   }
 
-  function trackTutorial(eventName, params){
-    try{
-      if(typeof window.gtag === 'function'){
-        window.gtag('event', eventName, params || {});
-      }
-    }catch(e){}
-  }
-
   async function startTour(idx){
     if(typeof idx !== 'number') idx = 0;
-    trackTutorial('tutorial_start',{ step: idx + 1 });
     ensureEls();
     tourIndex = idx;
     maskEl.style.display = 'block';
@@ -1655,7 +1716,6 @@
   }
 
   function endTour(){
-    trackTutorial('tutorial_end',{ completed: tourIndex === steps.length - 1 });
     if(maskEl) maskEl.style.display = 'none';
     if(focusEl) focusEl.style.display = 'none';
     if(panelEl) panelEl.style.display = 'none';
@@ -1664,9 +1724,6 @@
       elevatedEl.classList.remove('mk-tour-elevate');
       elevatedEl = null;
     }
-    try{
-      localStorage.setItem(TOUR_KEY,'1');
-    }catch(e){}
   }
 
   const tourBtn = document.getElementById('startTour');
@@ -1898,7 +1955,6 @@
     if(multiEstateTotal) multiEstateTotal.value = '';
     if(multiYears) multiYears.value = '';
     if(multiReturnRate) multiReturnRate.value = '';
-    // multiEffRate削除済み
     if(multiAnnualGiftPerPerson) multiAnnualGiftPerPerson.value = '';
     if(multiRecipients) multiRecipients.value = ''; 
     if(multiHeirs) multiHeirs.value = '';
@@ -1962,8 +2018,8 @@
 
     // グラフ用データ配列
     const chartLabels = [];
-    const dataAssetA = [estate0]; // 暦年: 資産推移
-    const dataAssetB = [estate0]; // 精算: 資産推移
+    const dataAssetA = [estate0]; 
+    const dataAssetB = [estate0]; 
 
     for(let i=0; i<=years; i++){
       chartLabels.push(''+i+'年後');
@@ -1973,7 +2029,7 @@
     let estateA = estate0;
     let totalGiftTaxA = 0;
     let addbackListA = [];
-    const annualHistoryA = []; // { giftTotal, taxYear, estateEnd }
+    const annualHistoryA = []; 
 
     for(let t=1; t<=years; t++){
       const plannedGiftTotal = giftPerPersonA * recipients;
@@ -2013,12 +2069,10 @@
     }
 
     const estateBaseA = estateA + addbackA;
-    // 修正: 入力値を使わず、速算表から相続税額を計算する（法定相続人数を使用）
     const estateTaxA = calcInheritanceTaxAmount(estateBaseA, heirs);
     const totalTaxA = totalGiftTaxA + estateTaxA;
     const finalNetA = Math.max(0, estateA - estateTaxA);
 
-    // 実効税率(A)参考 (計算結果表示用)
     const effectiveRateA = (estateBaseA > 0) ? (estateTaxA / estateBaseA) * 100 : 0;
 
     // ---- 相続時精算課税シナリオ (B) ----
@@ -2102,24 +2156,19 @@
     }
 
     const estateBaseB = estateB + addbackB;
-    // 修正: 入力値を使わず、速算表から相続税額を計算する（法定相続人数を使用）
     const estateTaxB_Total = calcInheritanceTaxAmount(estateBaseB, heirs);
 
-    // 精算課税分の贈与税控除
     let netEstateTaxB;
     let totalTaxB;
     if(estateTaxB_Total >= totalGiftTaxB){
       netEstateTaxB = estateTaxB_Total - totalGiftTaxB;
       totalTaxB = estateTaxB_Total; 
     }else{
-      // 贈与税の方が多い場合（還付される）
-      netEstateTaxB = estateTaxB_Total - totalGiftTaxB; // マイナスになる
+      netEstateTaxB = estateTaxB_Total - totalGiftTaxB;
       totalTaxB = estateTaxB_Total;
     }
 
     const finalNetB = Math.max(0, estateB - netEstateTaxB);
-    
-    // 実効税率(B)参考
     const effectiveRateB = (estateBaseB > 0) ? (estateTaxB_Total / estateBaseB) * 100 : 0;
 
     // 詳細テーブル構築
@@ -2209,14 +2258,14 @@
           {
             label: '贈与税総額',
             data: [Math.round(totalGiftTaxA), Math.round(totalGiftTaxB)],
-            backgroundColor: '#578899', // くっきり
+            backgroundColor: '#578899', 
             borderColor: '#476a7c',
             borderWidth: 1
           },
           {
             label: '相続税額',
             data: [Math.round(estateTaxA), Math.round(netEstateTaxB)],
-            backgroundColor: '#94a3b8', // 濃いめのグレー
+            backgroundColor: '#94a3b8', 
             borderColor: '#718096',
             borderWidth: 1
           }
@@ -2275,7 +2324,7 @@
           {
             label: '精算課税：資産残高',
             data: dataB2,
-            borderColor: '#c86445', // よりはっきりしたテラコッタ
+            borderColor: '#c86445',
             backgroundColor: 'rgba(200, 100, 70, 0.1)',
             tension: 0.1,
             borderWidth: 2,
