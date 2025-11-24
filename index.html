@@ -647,11 +647,11 @@
         bottom: 0;
         left: 0;
         width: 100%;
-        height: 40px;
-        padding: 5px 0;
+        height: 50px; /* 高さを確保 */
+        padding: 10px 20px;
         border-top: 1px solid #ccc;
-        background: #fff;
-        z-index: 9999;
+        background: #fff !important; /* 背景を白で塗りつぶし */
+        z-index: 2147483647; /* 最大値で最前面に表示 */
       }
       .print-logo {
         height: 30px;
@@ -1003,7 +1003,7 @@
         </div>
       </section>
 
-      <section class="card" id="multiAnnualCard">
+      <section class="card print-break-before" id="multiAnnualCard">
         <div class="card-header">
           <h2 class="card-title">STEP2-A 暦年贈与シナリオ（毎年コツコツ型）</h2>
         </div>
