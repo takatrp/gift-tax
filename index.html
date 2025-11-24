@@ -58,7 +58,6 @@
     }
     .app-header{
       background:var(--bg);
-      /* padding:12px 16px 8px; NOTE: 右端揃えのためpaddingを移動 */
       padding: 12px 0 8px;
       border-bottom:1px solid #d4e1e7;
       position: sticky;
@@ -74,7 +73,6 @@
       align-items:center;
       gap:12px;
       justify-content: space-between;
-      /* NOTE: .layoutのpaddingと合わせることで右端を揃える */
       padding: 0 16px;
     }
     .brand{
@@ -612,13 +610,9 @@
 
     /* 印刷設定 */
     @media print {
-      /* ページ全体の設定: ヘッダー用の余白(margin-top)をさらに大きく確保 */
       @page {
         size: A4;
-        margin-top: 30mm; /* 本文開始位置を30mm下げる */
-        margin-bottom: 15mm;
-        margin-left: 15mm;
-        margin-right: 15mm;
+        margin: 15mm; /* 標準的な余白に設定 */
       }
 
       body {
@@ -632,13 +626,51 @@
         padding: 0;
       }
       
-      /* コンテンツラッパーの設定 */
+      /* アプリ全体をテーブルとして表示（ヘッダー繰り返し用） */
       .app {
-        display: block !important;
+        display: table !important;
+        width: 100%;
         min-height: auto !important;
-        padding-top: 0; 
+        padding-top: 0;
       }
-      .layout { padding: 0; max-width: 100%; margin: 0; }
+      
+      /* ヘッダーをテーブルヘッダーグループとして設定 */
+      .print-only-header {
+        display: table-header-group !important;
+      }
+      
+      /* ヘッダーの中身のスタイル */
+      .print-header-content {
+        display: flex;
+        align-items: center;
+        justify-content: flex-start;
+        gap: 16px;
+        height: 20mm;
+        border-bottom: 2px solid var(--accent);
+        margin-bottom: 10mm; /* ヘッダーと本文の間隔 */
+        padding-bottom: 5px;
+      }
+
+      .print-logo {
+        height: 40px;
+        width: auto;
+        display: block;
+      }
+      
+      .print-text {
+        font-size: 18px;
+        font-weight: 700;
+        color: #000 !important;
+        display: block;
+      }
+
+      /* コンテンツ本体をテーブル行グループとして設定 */
+      .layout {
+        display: table-row-group !important;
+        padding: 0; 
+        max-width: 100%; 
+        margin: 0; 
+      }
 
       /* 不要なUI要素を非表示 */
       .app-header, .btn-tutorial, .btn-row, .btn-ghost, .action-buttons, 
@@ -646,45 +678,6 @@
       #startTour, #toggleDetailsBtn, #loadSampleBtn, .pill-switch,
       .app-footer {
         display: none !important;
-      }
-
-      /* 印刷用ヘッダー：固定配置でマージン領域（マイナスtop）に表示させる */
-      /* top位置を調整し、確保した30mmのマージンエリア内に配置 */
-      .print-only-header {
-        display: flex !important;
-        align-items: center;
-        justify-content: flex-start;
-        gap: 16px;
-        
-        /* 固定配置設定 */
-        position: fixed;
-        top: -25mm; /* マージン領域の上部に配置 */
-        left: 0;
-        width: 100%;
-        height: 20mm;
-        
-        /* デザイン */
-        border-bottom: 2px solid var(--accent);
-        background-color: #fff !important;
-        z-index: 99999;
-        padding-bottom: 5px;
-        
-        -webkit-print-color-adjust: exact;
-        print-color-adjust: exact;
-      }
-      
-      .print-logo {
-        height: 40px;
-        width: auto;
-        display: block;
-      }
-      
-      /* 社名テキスト */
-      .print-text {
-        font-size: 18px;
-        font-weight: 700;
-        color: #000 !important;
-        display: block;
       }
 
       /* 強制改ページクラス */
@@ -824,13 +817,15 @@
 </head>
 <body>
 
-<!-- 印刷時のみ表示されるヘッダー -->
-<div class="print-only-header">
-  <img src="./logo.jpg" alt="ロゴ" class="print-logo">
-  <span class="print-text">税理士法人松本会計事務所</span>
-</div>
-
 <div class="app">
+  <!-- 印刷時のみ表示されるヘッダー（.appの中に配置） -->
+  <div class="print-only-header">
+    <div class="print-header-content">
+      <img src="./logo.jpg" alt="ロゴ" class="print-logo">
+      <span class="print-text">税理士法人松本会計事務所</span>
+    </div>
+  </div>
+
   <header class="app-header">
     <div class="header-bar">
       <a href="https://takatrp.github.io/tool-portal/" class="brand">
@@ -1239,7 +1234,7 @@
     <a href="https://www.matsumoto-kaikei.or.jp/" target="_blank" rel="noopener license">税理士法人松本会計事務所</a> ｜ 
     <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank" rel="license noopener">CC BY-NC-SA 4.0</a> ｜ 
     <a href="/tool-portal/terms.html" target="_blank" rel="noopener">利用条件</a> ｜ 
-    <span id="build-rev">Rev.22</span>（<span id="last-updated-date"></span>）
+    <span id="build-rev">Rev.23</span>（<span id="last-updated-date"></span>）
   </footer>
 </div>
 
@@ -1247,7 +1242,7 @@
 (function(){
   'use strict';
 
-  const VERSION = 'Rev.22';
+  const VERSION = 'Rev.23';
 
   // 年号 & 最終更新日を自動反映
   (function syncFooterMeta(){
@@ -2522,4 +2517,3 @@
 
 </body>
 </html>
-
