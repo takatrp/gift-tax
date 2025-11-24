@@ -305,8 +305,9 @@
     @media print {
       @page {
         size: A4;
-        margin-top: 25mm; /* ヘッダー用スペース */
-        margin-bottom: 20mm; /* フッター用スペース */
+        /* ヘッダー・フッター用のスペースをここで確保します */
+        margin-top: 25mm; 
+        margin-bottom: 25mm; /* フッター用マージンを拡大 */
         margin-left: 15mm;
         margin-right: 15mm;
       }
@@ -317,6 +318,8 @@
         font-size: 10.5pt;
         -webkit-print-color-adjust: exact;
         print-color-adjust: exact;
+        /* コンテンツがフッターに被らないよう念のためpaddingも追加 */
+        padding-bottom: 20mm;
       }
 
       .app {
@@ -354,20 +357,21 @@
       .print-footer-fixed {
         display: flex !important;
         position: fixed;
-        /* あくまでもフッターとして下部に配置 */
-        bottom: 5mm; 
-        top: auto; /* ヘッダーとして振る舞わないように解除 */
+        /* 全ページの下部に固定配置 */
+        bottom: 0; 
         left: 0;
         width: 100%;
-        height: 15mm; /* エリアの高さを制限 */
+        height: 20mm; /* エリアの高さを確保 */
         align-items: flex-end; /* 下揃え */
         justify-content: center; /* 中央配置 */
-        background-color: transparent;
+        /* 背景を白にして、本文が重なった場合に文字が透けないようにする */
+        background-color: #fff; 
         z-index: 9999;
+        padding-bottom: 5mm; /* 用紙の端から少し浮かせる */
       }
       
       .print-footer-img {
-        max-height: 12mm; /* 画像を小さく制限 */
+        max-height: 15mm; /* 画像サイズ制限 */
         max-width: 100%;
         object-fit: contain;
       }
@@ -552,7 +556,9 @@
 
 <!-- 印刷用 固定フッター (全ページに強制表示、画像 footer.png を使用) -->
 <div class="print-footer-fixed">
-  <img src="./footer.png" alt="Footer" class="print-footer-img">
+  <!-- footer.png が見つからない場合はテキストを表示するフォールバックを追加 -->
+  <img src="./footer.png" alt="Copyright (c) Matsumoto Accounting Office." class="print-footer-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+  <span style="display:none; font-size:9pt; color:#888;">© 税理士法人松本会計事務所</span>
 </div>
 
 <div class="app">
