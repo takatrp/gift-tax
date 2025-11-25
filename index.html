@@ -359,7 +359,7 @@
       @page {
         size: A4;
         /* ヘッダー・フッター用のスペースをここで確保します */
-        margin-top: 25mm; 
+        margin-top: 10mm; 
         margin-bottom: 25mm; /* フッター用マージンを拡大 */
         margin-left: 15mm;
         margin-right: 15mm;
@@ -392,18 +392,7 @@
 
       /* 固定ヘッダー */
       .print-header-fixed {
-        display: flex !important;
-        position: fixed;
-        top: -15mm; 
-        left: 0;
-        width: 100%;
-        height: 15mm;
-        justify-content: space-between;
-        align-items: flex-end;
-        border-bottom: 2px solid var(--accent);
-        padding-bottom: 5px;
-        background-color: #fff;
-        z-index: 9999;
+        display: none !important;
       }
 
       /* 固定フッター（画像表示用） */
