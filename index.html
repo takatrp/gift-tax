@@ -923,13 +923,13 @@
               <div class="metric-sub">贈与後・運用後に残る相続財産（概算）</div>
             </div>
             <div class="metric metric-featured">
-              <div class="metric-label">税負担の差額（暦年 − 精算）</div>
+              <div class="metric-label">税負担の差額</div>
               <div class="metric-value" id="multiTaxDiff">- 円</div>
               <div id="multiTaxAdvantage" style="font-weight:900; font-size:18px; margin-top:4px; color:var(--accent);"></div>
               <div class="metric-sub" id="multiTaxDiffSub">プラスなら相続時精算課税シナリオの方が税負担が軽い結果です。</div>
             </div>
             <div class="metric metric-featured">
-              <div class="metric-label">最終手取金額の差額（精算 − 暦年）</div>
+              <div class="metric-label">最終手取金額の差額</div>
               <div class="metric-value" id="multiNetDiff">- 円</div>
               <div id="multiNetAdvantage" style="font-weight:900; font-size:18px; margin-top:4px; color:var(--accent);"></div>
               <div class="metric-sub" id="multiNetDiffSub">トータルの手取り（受贈分＋相続分−各税金）の差額です。※運用益の差等が影響します。</div>
@@ -1806,15 +1806,15 @@
 
   // サンプルデータ読込
   function loadSampleData(){
-    if(multiEstateTotal) multiEstateTotal.value = '150,000,000';
+    if(multiEstateTotal) multiEstateTotal.value = '200,000,000';
     if(multiYears) multiYears.value = '10';
-    if(multiReturnRate) multiReturnRate.value = '1.0';
+    if(multiReturnRate) multiReturnRate.value = '1.5';
     if(multiRecipients) multiRecipients.value = '2';
-    if(multiHeirs) multiHeirs.value = '3'; // ここを変更
+    if(multiHeirs) multiHeirs.value = '3';
     if(multiSpouse) multiSpouse.checked = true;
-    if(multiAnnualGiftPerPerson) multiAnnualGiftPerPerson.value = '3,100,000';
+    if(multiAnnualGiftPerPerson) multiAnnualGiftPerPerson.value = '5,000,000';
     if(multiSeisanInitialGift) multiSeisanInitialGift.value = '25,000,000';
-    if(multiSeisanAnnualGift) multiSeisanAnnualGift.value = '1,100,000';
+    if(multiSeisanAnnualGift) multiSeisanAnnualGift.value = '2,780,000';
     if(multiSeisanUsedSpecialBefore) multiSeisanUsedSpecialBefore.value = '0';
     
     // カンマ整形用イベント発火
@@ -2224,7 +2224,7 @@
     multiSeisanTaxDetail.textContent = `贈与税＋相続税額（精算課税適用財産 ${formatYen(Math.round(addbackB))}円 を加算して計算）`;
 
     const diff = totalTaxA - totalTaxB;
-    multiTaxDiff.textContent = formatYen(Math.round(diff)) + ' 円';
+    multiTaxDiff.textContent = formatYen(Math.round(Math.abs(diff))) + ' 円';
     
     if(diff > 0){
       multiTaxDiffSub.textContent = 'プラス（暦年 ＞ 精算）となっているため、この前提では相続時精算課税シナリオの方が税負担が軽い結果です。';
@@ -2248,7 +2248,7 @@
     const totalNetB = (totalGiftAmountB - totalGiftTaxB) + finalNetB;
     const netDiff = totalNetB - totalNetA;
 
-    multiNetDiff.textContent = formatYen(Math.round(netDiff)) + ' 円';
+    multiNetDiff.textContent = formatYen(Math.round(Math.abs(netDiff))) + ' 円';
     
     if(netDiff > 0){
       multiNetAdvantage.textContent = '相続時精算課税 有利';
