@@ -417,8 +417,8 @@
         height: 20mm; /* エリアの高さを確保 */
         align-items: flex-end; /* 下揃え */
         justify-content: center; /* 中央配置 */
-        /* 背景を白にして、本文が重なった場合に文字が透けないようにする */
-        background-color: #fff; 
+        /* 背景を透明にして、本文の罫線が隠れないようにする */
+        background-color: transparent; 
         z-index: 9999;
         padding-bottom: 5mm; /* 用紙の端から少し浮かせる */
       }
@@ -2153,6 +2153,19 @@
         </tr>
       `;
     }
+
+    // 合計行の追加
+    rowsHtml += `
+      <tr style="font-weight:bold; background:#eaeff2;">
+        <td style="text-align:center;">合計</td>
+        <td>${formatYen(Math.round(totalGiftAmountA))}</td>
+        <td>${formatYen(Math.round(totalGiftTaxA))}</td>
+        <td style="text-align:center;">-</td>
+        <td>${formatYen(Math.round(totalGiftAmountB))}</td>
+        <td>${formatYen(Math.round(totalGiftTaxB))}</td>
+        <td style="text-align:center;">-</td>
+      </tr>
+    `;
     
     // 最終結果行（相続発生後）
     rowsHtml += `
