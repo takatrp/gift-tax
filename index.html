@@ -1302,7 +1302,10 @@
     
     // 法定相続分で按分（全員均等と仮定）
     
-    const share = Math.floor(taxable / heirsCount);
+    // 端数を含めた法定相続分で按分（均等相続を簡便前提）
+    // Math.floor で切り捨てると課税遺産総額より小さい値で計算されてしまうため、
+    // ここでは端数込みで按分して総額の過小計算を防ぐ。
+    const share = taxable / heirsCount;
     const bracket = INHERITANCE_TAX_BRACKETS.find(b => share <= b.upTo) || INHERITANCE_TAX_BRACKETS[INHERITANCE_TAX_BRACKETS.length-1];
     const taxPerHeir = share * bracket.rate - bracket.deduction;
     const totalTax = Math.floor(taxPerHeir * heirsCount);
