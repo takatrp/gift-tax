@@ -1288,6 +1288,42 @@
     return Number.isFinite(n) ? n : defaultValue;
   }
 
+  function parseParamNumber(params, key, fallback = null){
+    const raw = params.get(key);
+    if(raw === null || raw === '') return fallback;
+    const normalized = String(raw).replace(/[０-９]/g, s => String.fromCharCode(s.charCodeAt(0) - 0xFEE0)).replace(/[\s,円]/g, '');
+    const n = Number(normalized);
+    return Number.isFinite(n) ? Math.floor(n) : fallback;
+  }
+
+  function parseParamDecimal(params, key, fallback = null){
+    const raw = params.get(key);
+    if(raw === null || raw === '') return fallback;
+    const normalized = String(raw).replace(/[０-９]/g, s => String.fromCharCode(s.charCodeAt(0) - 0xFEE0)).replace(/[\s,%]/g, '');
+    const n = Number(normalized);
+    return Number.isFinite(n) ? n : fallback;
+  }
+
+  function setRadioValue(name, value){
+    const el = document.querySelector(`input[name="${name}"][value="${value}"]`);
+    if(el) el.checked = true;
+  }
+
+  function setMoneyValue(el, value){
+    if(!el || value === null || value === undefined) return;
+    el.value = Math.max(0, Math.floor(value)).toLocaleString('ja-JP');
+  }
+
+  function setPlainValue(el, value){
+    if(!el || value === null || value === undefined) return;
+    el.value = String(value);
+  }
+
+  function paramBool(params, key){
+    const v = params.get(key);
+    return v === '1' || v === 'true' || v === 'yes';
+  }
+
   // 新しい相続税計算関数 (法定相続人の数と遺産総額から総額を算出)
   // 戻り値: { totalTax: number, deduction: number, taxable: number }
   function calcInheritanceTaxData(estateTotal, heirsCount) {
@@ -2504,6 +2540,87 @@
   // 印刷
   function handlePrint(){ window.print(); }
 
+  function showImportedParamsNotice(){
+    const main = document.querySelector('main.layout');
+    if(!main || document.getElementById('importedParamsNotice')) return;
+    const note = document.createElement('section');
+    note.className = 'card import-note';
+    note.id = 'importedParamsNotice';
+    note.innerHTML = `
+      <div class="card-header">
+        <h2 class="card-title">資産承継ナビから条件を読み込みました</h2>
+        <div class="badge">連携データ</div>
+      </div>
+      <div class="card-body">
+        金額・人数・年数などの初期値をURLから反映しています。贈与税の詳細試算に入る前に、受贈者・税率区分・要件を確認してください。
+      </div>
+    `;
+    main.prepend(note);
+  }
+
+  function applyUrlParams(){
+    const params = new URLSearchParams(window.location.search);
+    if(!params.size) return false;
+
+    const fromEstatePlanning = params.get('source') === 'estate-planning';
+    const tabMode = params.get('tabMode');
+    if(tabMode === 'single' || tabMode === 'multi'){
+      setRadioValue('tabMode', tabMode);
+    }
+
+    const mode = params.get('mode');
+    if(mode === 'annual' || mode === 'seisan'){
+      setRadioValue('mode', mode);
+    }
+
+    const annualMode = params.get('annualMode');
+    if(annualMode === 'general' || annualMode === 'special' || annualMode === 'both'){
+      setRadioValue('annualMode', annualMode);
+    }
+
+    updateTabMode();
+    updateMode();
+    updateAnnualInputs();
+
+    setMoneyValue(annualGeneralAmount, parseParamNumber(params, 'annualGeneralAmount'));
+    setMoneyValue(annualSpecialAmount, parseParamNumber(params, 'annualSpecialAmount'));
+    setMoneyValue(annualGeneralAmountBoth, parseParamNumber(params, 'annualGeneralAmountBoth'));
+    setMoneyValue(annualSpecialAmountBoth, parseParamNumber(params, 'annualSpecialAmountBoth'));
+    setMoneyValue(seisanAmount, parseParamNumber(params, 'seisanAmount'));
+    setMoneyValue(seisanUsedSpecial, parseParamNumber(params, 'seisanUsedSpecial'));
+
+    setMoneyValue(multiEstateTotal, parseParamNumber(params, 'multiEstateTotal', parseParamNumber(params, 'estateTotal')));
+    setPlainValue(multiYears, parseParamNumber(params, 'multiYears'));
+    setPlainValue(multiReturnRate, parseParamDecimal(params, 'multiReturnRate'));
+    setPlainValue(multiRecipients, parseParamNumber(params, 'multiRecipients'));
+    setPlainValue(multiHeirs, parseParamNumber(params, 'multiHeirs', parseParamNumber(params, 'heirs')));
+    if(multiSpouse && params.has('multiSpouse')) multiSpouse.checked = paramBool(params, 'multiSpouse');
+    else if(multiSpouse && params.has('spouse')) multiSpouse.checked = paramBool(params, 'spouse');
+    setMoneyValue(multiAnnualGiftPerPerson, parseParamNumber(params, 'multiAnnualGiftPerPerson'));
+    setMoneyValue(multiSeisanInitialGift, parseParamNumber(params, 'multiSeisanInitialGift'));
+    setMoneyValue(multiSeisanAnnualGift, parseParamNumber(params, 'multiSeisanAnnualGift'));
+    setMoneyValue(multiSeisanUsedSpecialBefore, parseParamNumber(params, 'multiSeisanUsedSpecialBefore'));
+
+    if(fromEstatePlanning) showImportedParamsNotice();
+
+    const selectedTabMode = document.querySelector('input[name="tabMode"]:checked')?.value || 'single';
+    const selectedMode = document.querySelector('input[name="mode"]:checked')?.value || 'annual';
+    if(selectedTabMode === 'single' && selectedMode === 'annual' && (
+      parseYenInput(annualGeneralAmount) > 0 ||
+      parseYenInput(annualSpecialAmount) > 0 ||
+      parseYenInput(annualGeneralAmountBoth) > 0 ||
+      parseYenInput(annualSpecialAmountBoth) > 0
+    )){
+      handleCalcAnnual();
+    }else if(selectedTabMode === 'single' && selectedMode === 'seisan' && parseYenInput(seisanAmount) > 0){
+      handleCalcSeisan();
+    }else if(selectedTabMode === 'multi' && parseYenInput(multiEstateTotal) > 0 && parseNumber(multiYears, 0) > 0){
+      handleMultiSim();
+    }
+
+    return true;
+  }
+
   // イベント設定
   modeRadios.forEach(r => r.addEventListener('change', updateMode));
   annualModeRadios.forEach(r => r.addEventListener('change', updateAnnualInputs));
@@ -2526,6 +2643,7 @@
   updateAnnualInputs();
   resetResult();
   resetMultiResult();
+  applyUrlParams();
 })();
 </script>
 
